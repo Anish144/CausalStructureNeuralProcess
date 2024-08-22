@@ -810,11 +810,12 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
         perm_inv = torch.transpose(perm, 3, 2)
         # # All matrices
         # extract mask for variable node size
+        # tril doesnt work on some dtypes
         mask = torch.tril(
             torch.ones(
                 (self.num_nodes, self.num_nodes),
                 device=perm.device,
-                dtype=float()
+                dtype=torch.float32,
             ),
             diagonal=-1
         ).to(perm.dtype)
