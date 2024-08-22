@@ -117,8 +117,7 @@ class CausalClassifierTrainer:
     def validate_single_epoch(self, val_loader, metric_dict):
         self.model.eval()
         dtype = th.float32
-        if self.bfloat16:
-            self.model.to(th.float32)
+        self.model.to(dtype)
 
         all_loss = 0
         all_preds = 0
@@ -177,6 +176,7 @@ class CausalClassifierTrainer:
                         targets[i, 0, 1] = 1
                     else:
                         targets[i, 1, 0] = 1
+            # import pdb; pdb.set_trace()
 
             # Zero the parameter gradients
             self.optimizer.zero_grad()

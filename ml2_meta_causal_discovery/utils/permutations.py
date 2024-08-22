@@ -6,7 +6,7 @@ import numpy as np
 from scipy.optimize import linear_sum_assignment
 
 
-def sample_gumbel(shape, device="cpu", eps=1e-20):
+def sample_gumbel(shape, device="cpu", eps=1e-20, dtype=torch.float32):
     """Samples arbitrary-shaped standard gumbel variables.
     Args:
     shape: list of integers
@@ -15,7 +15,7 @@ def sample_gumbel(shape, device="cpu", eps=1e-20):
     A sample of standard Gumbel random variables
     """
 
-    u = torch.rand(shape, device=device).float()
+    u = torch.rand(shape, device=device).to(dtype)
     return -torch.log(-torch.log(u + eps) + eps)
 
 
@@ -78,7 +78,8 @@ def matching(matrix_batch):
             sol[i, :] = linear_sum_assignment(-x[i, :])[1].astype(np.int32)
         return sol
 
-    listperms = hungarian(matrix_batch.detach().cpu().numpy())
+    # Hungarian requires float32
+    listperms = hungarian(matrix_batch.float().detach().cpu().numpy())
     listperms = torch.from_numpy(listperms)
     return listperms
 
@@ -141,18 +142,20 @@ def sample_permutation(
     log_alpha = log_alpha.reshape(-1, n, n)
     batch_size = log_alpha.size()[0]
     log_alpha_w_noise = log_alpha.repeat(n_samples, 1, 1)
+    dtype = log_alpha.dtype
 
     if noise_factor == 0:
         noise = 0.0
     else:
-        noise = sample_gumbel([n_samples * batch_size, n, n], device=device) * noise_factor
+        noise = sample_gumbel(
+            [n_samples * batch_size, n, n], device=device, dtype=dtype
+        ) * noise_factor
 
     log_alpha_w_noise = log_alpha_w_noise + noise
     log_alpha_w_noise = log_alpha_w_noise / temp
 
     log_alpha_w_noise_copy = log_alpha_w_noise.clone()
     sink = sinkhorn(log_alpha_w_noise_copy, n_iters)
-
     if n_samples > 1 or squeeze is False:
         sink = sink.reshape(n_samples, batch_size, n, n)
         sink = torch.transpose(sink, 1, 0)
@@ -167,7 +170,7 @@ def sample_permutation(
         log_alpha_w_noise_flat = log_alpha_w_noise_flat.view(-1, n, n)
         hard_perms_inf = matching(log_alpha_w_noise_flat)
         inverse_hard_perms_inf = invert_listperm(hard_perms_inf)
-        sink_hard = listperm2matperm(hard_perms_inf).to(device).float()
+        sink_hard = listperm2matperm(hard_perms_inf).to(device).to(dtype)
         sink_hard = sink_hard.view(n_samples, batch_size, n, n)
         sink_hard = torch.transpose(sink_hard, 1, 0)
         ret = (sink_hard - sink.detach() + sink, log_alpha_w_noise)

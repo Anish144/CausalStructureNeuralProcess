@@ -61,7 +61,7 @@ def npf_main(args):
         num_layers_encoder=args.num_layers_encoder,
         num_layers_decoder=args.num_layers_decoder,
         device="cuda" if torch.cuda.is_available() else "cpu",
-        dtype=torch.float32,
+        dtype=torch.bfloat16,
         num_nodes=args.num_nodes,
         n_perm_samples=args.n_perm_samples,
         sinkhorn_iter=args.sinkhorn_iter,

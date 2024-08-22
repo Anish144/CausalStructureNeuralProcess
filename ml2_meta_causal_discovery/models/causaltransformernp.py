@@ -660,6 +660,7 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
             device=device,
             dtype=dtype,
         )
+        self.num_nodes = num_nodes
         self.n_perm_samples = n_perm_samples
         self.sinkhorn_iter = sinkhorn_iter
         self.output_embedder = build_mlp(
@@ -716,9 +717,6 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
             dim_out=1,
             depth=emb_depth,
         )
-        # self.mask = torch.zeros((num_nodes, num_nodes), device=device, dtype=dtype).fill_(float(-1e10)).triu(0)
-        self.mask = torch.tril(torch.ones((num_nodes, num_nodes), device=device, dtype=dtype), diagonal=-1)
-        self.ovector = torch.arange(num_nodes, device=device, dtype=dtype)
 
     def decode(self, representation, is_training=True):
         # shape [batch_size, num_nodes, d_model]
@@ -785,10 +783,15 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
         L_param, Q_rep = self.decode(representation=representation)
         # shape [batch_size, num_nodes]
         p_param = self.p_param(Q_rep).squeeze(-1)
+        ovector = torch.arange(
+            self.num_nodes,
+            device=p_param.device,
+            dtype=p_param.dtype
+        )
         Q_param = torch.einsum(
             "bn,m->bnm",
             p_param,
-            self.ovector[: representation.size(1)],
+            ovector[: representation.size(1)],
         )
         # Sample permutations
         # shape = [batch_size, n_samples, num_nodes, num_nodes]
@@ -807,7 +810,15 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
         perm_inv = torch.transpose(perm, 3, 2)
         # # All matrices
         # extract mask for variable node size
-        my_mask = self.mask[: representation.size(1), : representation.size(1)]
+        mask = torch.tril(
+            torch.ones(
+                (self.num_nodes, self.num_nodes),
+                device=perm.device,
+                dtype=perm.dtype
+            ),
+            diagonal=-1
+        )
+        my_mask = mask[: representation.size(1), : representation.size(1)]
         all_masks = torch.einsum(
             "bnij,jk,bnkl->bnil",
             perm,

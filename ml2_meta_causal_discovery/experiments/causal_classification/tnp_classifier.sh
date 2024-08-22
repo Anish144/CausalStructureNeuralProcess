@@ -61,10 +61,10 @@ python3 train_causal_classify.py \
     --run_name="test_large_model" \
     --data_file="gplvm_20var" \
     --num_workers=12 \
-    --num_layers_encoder=6 \
-    --num_layers_decoder=6 \
-    --dim_model=512 \
-    --dim_feedforward=1024 \
+    --num_layers_encoder=2 \
+    --num_layers_decoder=2 \
+    --dim_model=32 \
+    --dim_feedforward=64 \
     --decoder="probabilistic" \
     --seed=0 \
     --lr_warmup_ratio=0.1 \
