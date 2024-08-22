@@ -13,9 +13,9 @@ export XLA_FLAGS=--xla_gpu_cuda_data_dir=/gpfs/easybuild/prod/software/CUDA/11.8
 # Construct the run_name using the desired variables
 RUN_NAME="${DS}_NH${NH}_NE${NE}_ND${ND}_DM${DM}_DF${DF}"
 
-python3 /gpfs/home/ad6013/Research/ml2_meta_causal_discovery/ml2_meta_causal_discovery/experiments/causal_classification/train_causal_classify.py \
-    --work_dir="/gpfs/home/ad6013/Research/ml2_meta_causal_discovery/ml2_meta_causal_discovery/" \
-    --learning_rate_max=5e-4 \
+python3 /gpfs/home/ad6013/Research/CausalStructureNeuralProcess/ml2_meta_causal_discovery/experiments/causal_classification/train_causal_classify.py \
+    --work_dir="/gpfs/home/ad6013/Research/CausalStructureNeuralProcess/ml2_meta_causal_discovery/" \
+    --learning_rate=1e-4 \
     --batch_size=32 \
     --max_epochs=2 \
     --run_name=$RUN_NAME \
@@ -27,11 +27,11 @@ python3 /gpfs/home/ad6013/Research/ml2_meta_causal_discovery/ml2_meta_causal_dis
     --dim_feedforward=$DF \
     --decoder="probabilistic" \
     --seed=0 \
-    --lr_warmup_steps=5000 \
+    --lr_warmup_ratio=0.1 \
     --num_nodes=20 \
     --nhead=$NH \
     --n_perm_samples=25 \
     --sinkhorn_iter=1000 \
 
-python3 /gpfs/home/ad6013/Research/ml2_meta_causal_discovery/ml2_meta_causal_discovery/experiments/causal_classification/test_causal_classify.py \
+python3 /gpfs/home/ad6013/Research/CausalStructureNeuralProcess/ml2_meta_causal_discovery/experiments/causal_classification/test_causal_classify.py \
     --model-list=$RUN_NAME \
