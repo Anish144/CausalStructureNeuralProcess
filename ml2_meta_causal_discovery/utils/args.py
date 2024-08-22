@@ -15,7 +15,7 @@ def retun_default_args(parser):
         "--work_dir",
         "-wd",
         type=str,
-        default="/vol/bitbucket/ad6013/Research/ml2_meta_causal_discovery/ml2_meta_causal_discovery/",
+        default="/vol/bitbucket/ad6013/Research/CausalStructureNeuralProcess/ml2_meta_causal_discovery/",
         help="Folder where the Neural Process Family is stored.",
     )
     parser.add_argument(
@@ -27,7 +27,7 @@ def retun_default_args(parser):
     )
     parser.add_argument(
         "--weight_decay",
-        "-wd",
+        "-wdecay",
         type=float,
         default=0.00001,
         help="Weight decay for optimizer.",

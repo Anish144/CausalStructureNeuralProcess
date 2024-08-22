@@ -160,8 +160,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     args = retun_default_args(parser)
 
-    sys.path.insert(0, args.npf_folder)
-
     torch.manual_seed(args.seed)
     random.seed(args.seed)
     np.random.seed(args.seed)
