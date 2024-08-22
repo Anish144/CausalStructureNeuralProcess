@@ -55,7 +55,7 @@ export CUDA_VISIBLE_DEVICES=0
 
 
 python3 train_causal_classify.py \
-    --learning_rate_max=5e-4 \
+    --learning_rate=2e-4 \
     --batch_size=32 \
     --max_epochs=2 \
     --run_name="test_large_model" \

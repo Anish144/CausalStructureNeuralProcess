@@ -108,7 +108,11 @@ def npf_main(args):
     )
 
     optimiser = getattr(torch.optim, args.optimizer)
-    optimiser_part_init = partial(optimiser, lr=args.learning_rate)
+    optimiser_part_init = partial(
+        optimiser,
+        lr=args.learning_rate,
+        weight_decay=args.weight_decay,
+    )
 
     save_dir = (
         work_dir

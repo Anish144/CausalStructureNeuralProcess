@@ -22,14 +22,21 @@ def retun_default_args(parser):
         "--learning_rate",
         "-lr",
         type=float,
-        default=3e-4,
+        default=2e-4,
         help="Learning rate minimum for optimizer.",
+    )
+    parser.add_argument(
+        "--weight_decay",
+        "-wd",
+        type=float,
+        default=0.00001,
+        help="Weight decay for optimizer.",
     )
     parser.add_argument(
         "--optimizer",
         "-opt",
         type=str,
-        default="Adam",
+        default="AdamW",
         help="Optimizer from torch.optim.",
     )
     parser.add_argument(
@@ -43,7 +50,7 @@ def retun_default_args(parser):
         "--max_epochs",
         "-me",
         type=int,
-        default=400,
+        default=2,
         help="Max epochs to run for.",
     )
     parser.add_argument(
