@@ -1,0 +1,37 @@
+#!/bin/bash
+#PBS -l walltime=72:00:00
+#PBS -l select=1:ncpus=12:mem=32gb:ngpus=1:gpu_type=A100
+
+eval "$(~/miniconda3/bin/conda shell.bash hook)"
+
+conda activate np_causal_discovery_3.8
+
+module load cuDNN/8.6.0.163-CUDA-11.8.0
+
+export XLA_FLAGS=--xla_gpu_cuda_data_dir=/gpfs/easybuild/prod/software/CUDA/11.8.0/
+
+# Construct the run_name using the desired variables
+RUN_NAME="${DS}_NH${NH}_NE${NE}_ND${ND}_DM${DM}_DF${DF}"
+
+python3 /gpfs/home/ad6013/Research/ml2_meta_causal_discovery/ml2_meta_causal_discovery/experiments/causal_classification/train_causal_classify.py \
+    --work_dir="/gpfs/home/ad6013/Research/ml2_meta_causal_discovery/ml2_meta_causal_discovery/" \
+    --learning_rate_max=5e-4 \
+    --batch_size=32 \
+    --max_epochs=2 \
+    --run_name=$RUN_NAME \
+    --data_file=$DS \
+    --num_workers=12 \
+    --num_layers_encoder=$NE \
+    --num_layers_decoder=$ND \
+    --dim_model=$DM \
+    --dim_feedforward=$DF \
+    --decoder="probabilistic" \
+    --seed=0 \
+    --lr_warmup_steps=5000 \
+    --num_nodes=20 \
+    --nhead=$NH \
+    --n_perm_samples=25 \
+    --sinkhorn_iter=1000 \
+
+python3 /gpfs/home/ad6013/Research/ml2_meta_causal_discovery/ml2_meta_causal_discovery/experiments/causal_classification/test_causal_classify.py \
+    --model-list=$RUN_NAME \

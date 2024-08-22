@@ -1,0 +1,2 @@
+models/3var_auto_fixtgtmask_tgtmaskonval/model_0.pt filter=lfs diff=lfs merge=lfs -text
+models/3var_auto_fixtgtmask_tgtmaskonval/model_1.pt filter=lfs diff=lfs merge=lfs -text
