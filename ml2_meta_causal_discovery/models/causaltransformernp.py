@@ -814,10 +814,10 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
             torch.ones(
                 (self.num_nodes, self.num_nodes),
                 device=perm.device,
-                dtype=perm.dtype
+                dtype=float()
             ),
             diagonal=-1
-        )
+        ).to(perm.dtype)
         my_mask = mask[: representation.size(1), : representation.size(1)]
         all_masks = torch.einsum(
             "bnij,jk,bnkl->bnil",
