@@ -15,7 +15,6 @@ from ml2_meta_causal_discovery.datasets.data.cha_pairs.generate_cha_pairs import
 )
 from ml2_meta_causal_discovery.utils.args import retun_default_args
 from ml2_meta_causal_discovery.utils.datautils import MultipleFileDataset
-from ml2_meta_causal_discovery.utils.helpers import get_sched_opt_kwargs
 from ml2_meta_causal_discovery.utils.train_classifier_model import (
     CausalClassifierTrainer,
 )
@@ -108,24 +107,8 @@ def npf_main(args):
         torch.from_numpy(full_inputs), torch.from_numpy(target_graph)
     )
 
-    shed_kwargs, optim_kwargs = get_sched_opt_kwargs(args)
-
-    if args.scheduler != "None":
-        if args.scheduler not in shed_kwargs.keys():
-            raise NotImplementedError("Scheduler does not have kwargs.")
-    if args.optimizer not in optim_kwargs.keys():
-        raise NotImplementedError("Optimizer does not have kwargs.")
-
-    if args.scheduler != "None":
-        scheduler = getattr(torch.optim.lr_scheduler, args.scheduler)
-        sched_kwargs = shed_kwargs[args.scheduler]
-        scheduler_part_init = scheduler
-    else:
-        scheduler_part_init = None
-        sched_kwargs = None
-
     optimiser = getattr(torch.optim, args.optimizer)
-    optimiser_part_init = partial(optimiser, **optim_kwargs[args.optimizer])
+    optimiser_part_init = partial(optimiser, lr=args.learning_rate)
 
     save_dir = (
         work_dir

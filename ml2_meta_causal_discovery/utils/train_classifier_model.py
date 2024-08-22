@@ -6,7 +6,7 @@ This will not use skorch.
 import torch as th
 from ml2_meta_causal_discovery.utils.datautils import (
     transformer_classifier_split,
-    # transformer_classifier_val_split,
+    transformer_classifier_val_split,
 )
 import wandb
 from tqdm import tqdm
