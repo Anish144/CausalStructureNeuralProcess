@@ -120,6 +120,7 @@ class CausalTransformerDecoderLayer(nn.TransformerDecoderLayer):
         layer_norm_eps: float = 0.00001,
         batch_first: bool = True,
         norm_first: bool = True,
+        bias: bool = False,
         device=None,
         dtype=None
     ) -> None:
@@ -133,6 +134,7 @@ class CausalTransformerDecoderLayer(nn.TransformerDecoderLayer):
             batch_first=batch_first,
             norm_first=norm_first,
             device=device,
+            bias=bias,
             dtype=dtype,
         )
         self.dim_feedforward = dim_feedforward
@@ -289,7 +291,9 @@ class CausalTNPEncoder(nn.Module):
             nhead=nhead,
             dim_feedforward=dim_feedforward,
             dropout=dropout,
+            bias=False,
             batch_first=True,
+            norm_first=True,
             device=device,
             dtype=dtype,
         )
@@ -420,6 +424,7 @@ class CausalTNPDecoder(CausalTNPEncoder):
                 dropout=dropout,
                 norm_first=True,
                 batch_first=True,
+                bias=False,
             ),
             num_layers=num_layers_decoder,
         )
@@ -683,6 +688,7 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
                 batch_first=True,
                 device=device,
                 dtype=dtype,
+                bias=False,
             ),
             num_layers=num_layers_decoder // 2,
         )
@@ -696,6 +702,7 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
                 batch_first=True,
                 device=device,
                 dtype=dtype,
+                bias=False,
             ),
             num_layers=num_layers_decoder // 2,
         )

@@ -2,6 +2,7 @@
 
 # List of parameters as space-separated strings
 param_list=(
+    "4,4,256,512,8,gplvm_20var", # This model fits on local compute
     "10,10,256,512,8,gplvm_20var",
     "10,10,512,1024,8,gplvm_20var",
     "10,10,1024,2048,8,gplvm_20var",

@@ -111,7 +111,9 @@ class CausalClassifierTrainer:
                 # "test_accuracy": accuracy,
             }
         )
+        dtype = th.bfloat16 if self.bfloat16 else th.float32
         self.model.train()
+        self.model.to(dtype)
         return metric_dict
 
     def validate_single_epoch(self, val_loader, metric_dict):
@@ -141,7 +143,9 @@ class CausalClassifierTrainer:
                 # "val_accuracy": accuracy,
             }
         )
+        dtype = th.bfloat16 if self.bfloat16 else th.float32
         self.model.train()
+        self.model.to(dtype)
         return metric_dict
 
     def train_single_epoch(
@@ -152,6 +156,7 @@ class CausalClassifierTrainer:
         epoch,
         lr_warmup_steps,
     ):
+        self.model = th.compile(self.model, reduce_overhead=True)
         self.model.train()
         dtype = th.bfloat16 if self.bfloat16 else th.float32
         self.model.to(dtype)
