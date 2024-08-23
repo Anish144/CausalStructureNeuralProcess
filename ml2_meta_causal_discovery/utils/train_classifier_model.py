@@ -156,7 +156,6 @@ class CausalClassifierTrainer:
         epoch,
         lr_warmup_steps,
     ):
-        self.model = th.compile(self.model)
         self.model.train()
         dtype = th.bfloat16 if self.bfloat16 else th.float32
         self.model.to(dtype)
