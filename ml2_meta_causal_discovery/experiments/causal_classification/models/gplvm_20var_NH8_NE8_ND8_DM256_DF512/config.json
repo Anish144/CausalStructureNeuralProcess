@@ -1,0 +1,1 @@
+{"d_model": 256, "emb_depth": 1, "dim_feedforward": 512, "nhead": 8, "dropout": 0.0, "num_layers_encoder": 8, "num_layers_decoder": 8, "device": "cuda", "dtype": null, "num_nodes": 20, "n_perm_samples": 25, "sinkhorn_iter": 1000, "use_positional_encoding": false, "module": "probabilistic"}

@@ -58,7 +58,7 @@ python3 train_causal_classify.py \
     --learning_rate=2e-4 \
     --batch_size=32 \
     --max_epochs=2 \
-    --run_name="test_large_model" \
+    --run_name="test_large_model_float32" \
     --data_file="gplvm_20var" \
     --num_workers=12 \
     --num_layers_encoder=4 \
