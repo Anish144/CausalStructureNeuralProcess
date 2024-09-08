@@ -12,10 +12,10 @@ from ml2_meta_causal_discovery.datasets.causal_graph_generator import (
 from ml2_meta_causal_discovery.datasets.functions_generator import (
     GPFunctionGenerator,
     GPLVMFunctionGenerator,
-    GPLVMFixedHyperparam,
+    LinearFunctionGenerator,
 )
 from ml2_meta_causal_discovery.utils.datautils import (
-    divide_context_target,
+    # divide_context_target,
     get_random_indices,
 )
 
@@ -302,7 +302,7 @@ class ClassifyDatasetGenerator(IterableDataset):
         mean_function: str = "latent",
         device: str = "cpu",
     ):
-        valid_function_generators = ["gplvm", "gp", "gplvm_fixed_hyperparam"]
+        valid_function_generators = ["gplvm", "gp", "linear"]
         valid_graph_types = ["ER", "SF"]
         assert (
             function_generator in valid_function_generators
@@ -326,6 +326,12 @@ class ClassifyDatasetGenerator(IterableDataset):
             )
         elif self.function_generator == "gp":
             self.data_generator = GPFunctionGenerator(
+                num_variables=self.num_variables,
+                num_samples=self.num_samples,
+                interventions=False,
+            )
+        elif self.function_generator == "linear":
+            self.data_generator = LinearFunctionGenerator(
                 num_variables=self.num_variables,
                 num_samples=self.num_samples,
                 interventions=False,
@@ -432,13 +438,13 @@ class ClassifyDatasetGenerator(IterableDataset):
                 s0=expected_node_degree,
                 graph_type=self.graph_type,
             )
+
             # Need to permute the graph so that the graph is randomised.
             permutation_indices = np.random.permutation(self.num_variables)
 
             # [num_samples, num_variables]
             (
-                single_data,
-                _,
+                single_data
             ) = self.data_generator.generate_data(
                 causal_graph=dag,
                 num_int_samples=self.num_samples,

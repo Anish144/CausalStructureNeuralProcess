@@ -117,7 +117,7 @@ def expected_f1_score(target, pred):
     pred: np.ndarray, shape (num_samples, batch_size, num_nodes, num_nodes)
     """
     f1_all = np.zeros(pred.shape[1])
-    for i in trange(pred.shape[1]):
+    for i in range(pred.shape[1]):
         # Select batch
         curr_pred = pred[:, i]
         curr_target = target[i]
@@ -127,7 +127,8 @@ def expected_f1_score(target, pred):
             f1 = f1_score(
                 curr_target.flatten(),
                 curr_pred[j].flatten(),
-                average="binary"
+                average="binary",
+                zero_division=0,
             )
             f1_sample.append(f1)
         f1_all[i] = np.mean(f1_sample)

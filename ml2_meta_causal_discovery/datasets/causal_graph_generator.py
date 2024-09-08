@@ -49,7 +49,9 @@ def generate_synthetic_dag(d, s0, graph_type):
 
     else:
         raise ValueError("unknown graph type")
-    B_perm = _random_permutation(B)
+    # B_perm = _random_permutation(B)
+    # Make B upper triangular
+    B_perm = B.T
     assert ig.Graph.Adjacency(B_perm.tolist()).is_dag()
     return B_perm
 
@@ -104,5 +106,5 @@ if __name__ == "__main__":
     # print(np.mean(np.sum(dag, axis=1)))
     # Get 2 node DAG
     for i in range(10):
-        dag = generate_random_dag(3, 0.5)
+        dag = generate_synthetic_dag(5, 5, "ER")
         print(dag)

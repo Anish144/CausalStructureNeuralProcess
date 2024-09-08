@@ -87,7 +87,7 @@ def plot_results(results: dict, model_key: dict, data_name: str):
 
         # Save the plot with high resolution
         plt.savefig(
-            Path(__file__).absolute().parent / f'{data_name}_Boxplot.png',
+            Path(__file__).absolute().parent / f'{data_name}_Boxplot_LR.png',
             format='png',
             dpi=300,
             bbox_inches='tight'
@@ -145,21 +145,25 @@ if __name__ == "__main__":
 
     # baseline_file_1 = "gplvm_er20_bayesdag"
     baseline_file_1 = None
-    model_1 = "gplvm_20var_NH8_NE4_ND4_DM512_DF1024"
-    model_2 = "gplvm_20var_NH8_NE6_ND6_DM256_DF512"
-    model_3 = "gplvm_20var_NH8_NE10_ND10_DM256_DF512"
-    model_4 = "gplvm_20var_NH8_NE8_ND8_DM256_DF512"
-    model_5 = "gplvm_20var_NH8_NE4_ND4_DM256_DF512"
+    model_1 = "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.00001"
+    model_2 = "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.00005"
+    model_3 = "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.0001"
+    model_4 = "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.0005"
+    model_5 = "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.001"
+    model_6 = "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.005"
+    model_7 = "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.01"
     # model_6 = "20var_prob_ER10to60"
     # model_7 = "gplvm_20var_NH16_NE4_ND12_DM256_DF512"
 
     model_key = {
         # "gplvm_er20_bayesdag": "BayesDAG",
-        "gplvm_20var_NH8_NE4_ND4_DM512_DF1024": "4layer512",
-        "gplvm_20var_NH8_NE6_ND6_DM256_DF512": "6layer256",
-        "gplvm_20var_NH8_NE10_ND10_DM256_DF512": "10layer256",
-        "gplvm_20var_NH8_NE8_ND8_DM256_DF512": "8layer256",
-        "gplvm_20var_NH8_NE4_ND4_DM256_DF512": "4layer256",
+        "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.00001": "1e-5",
+        "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.00005": "5e-5",
+        "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.0001": "1e-4",
+        "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.0005": "5e-4",
+        "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.001": "1e-3",
+        "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.005": "5e-3",
+        "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.01": "1e-2",
         # "20var_prob_ER10to60": "CausalNPProbabilisticER10to60",
         # "gplvm_20var_NH16_NE4_ND12_DM256_DF512": "4EN_12DE",
 
@@ -174,8 +178,8 @@ if __name__ == "__main__":
         model_3,
         model_4,
         model_5,
-        # model_6,
-        # model_7
+        model_6,
+        model_7
     ]
 
     for data in data_files:

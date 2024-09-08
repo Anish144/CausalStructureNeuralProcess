@@ -106,30 +106,6 @@ class GPFunctions(GPLVMFunctions):
         return outputs
 
 
-class LinearFunctions:
-
-    def __init__(self, no_latent=True) -> None:
-        self.no_latent = no_latent
-
-    def __call__(self, inputs: np.ndarray) -> np.ndarray:
-        """
-        Samples from a linear function.
-        """
-        if self.no_latent:
-            # Ignore the latent variable
-            inputs = inputs[:, :-1]
-
-        input_num = inputs.shape[-1]
-
-        if input_num == 1:
-            return np.random.normal(loc=0, scale=1.0, size=(inputs.shape[0]))
-        else:
-            weights = np.random.normal(loc=0, scale=10.0, size=(input_num))
-            noise_hyper = np.random.gamma(shape=1.5, scale=2.5, size=(inputs.shape[0]))
-            noise = np.random.normal(loc=0, scale=noise_hyper)
-            return inputs @ weights + noise
-
-
 class DataGenerator(ABC):
     """
     Base class for all causal data generators.
@@ -182,14 +158,25 @@ class DataGenerator(ABC):
         permuted_int_data : np.ndarray shape (num_interventions, num_variables)
             Data with interventions carried out.
         """
-        # Make sure that the causal graph is a is topologically sorted!
         # Functions will be a dict with keys being the variable number
         function_dict = self.generate_functions(causal_graph)
         data = np.zeros((self.num_samples, self.number_of_variables))
+        interventional_data = np.zeros(
+            (num_int_samples, self.number_of_variables)
+        )
         # Causal graph row i is a parent of column j.
         # We always need to generate the cause first.
         # Thus, we need to loop in order of the causal graph.
-        loop_order = np.arange(self.number_of_variables)
+        if self.number_of_variables == 2:
+            if np.sum(causal_graph[1, :]) == 1:
+                loop_order = np.arange(self.number_of_variables)[::-1]
+            else:
+                loop_order = np.arange(self.number_of_variables)
+        else:
+            loop_order = np.arange(self.number_of_variables)
+
+        if causal_graph[1, 0] == 1:
+            import pdb; pdb.set_trace()
 
         # We need to make sure that the inerventions are samplef from the
         # SAME FUNCTION!
@@ -204,7 +191,26 @@ class DataGenerator(ABC):
             inputs = self._get_inputs(parents_of_i, data)
             full_inputs_obs = np.concatenate((inputs, latent), axis=1)
 
-            full_inputs = full_inputs_obs
+            # Interventional data from the same function as the observational.
+            # Sample interventional data
+            if i == 0:
+                full_inputs = full_inputs_obs
+            else:
+                if self.interventions:
+                    latent_int = sample_normal_latent(num_int_samples)
+                    inputs_int = self._get_inputs(
+                        parents_of_i, interventional_data
+                    )
+                    full_inputs_int = np.concatenate(
+                        (inputs_int, latent_int), axis=1
+                    )
+                    # the last [num_int_samples, :] is the interventional data
+                    full_inputs = np.concatenate(
+                        (full_inputs_obs, full_inputs_int), axis=0
+                    )
+                    full_inputs = tf.convert_to_tensor(full_inputs)
+                else:
+                    full_inputs = full_inputs_obs
 
             # Sometimes hyperparams give badly conditioned cov matrices,
             # This resamples until it works.
@@ -226,10 +232,35 @@ class DataGenerator(ABC):
                 function_for_i = function_dict[i]
                 variable = function_for_i(full_inputs)
 
-            variable_obs = variable
+            if i == 0:
+                # variable_obs = normalise_variable(variable, axis=0)
+                variable_obs = variable
+                # Intervened on variable does not need to be normalised
+                if self.interventions:
+                    # variable_int = uniform_interventions(
+                    #     num_samples=num_int_samples, range=(tf.math.reduce_min(variable_obs), tf.math.reduce_max(variable_obs))
+                    # )
+                    variable_int = deepcopy(variable_obs)
+            else:
+                # variable_normed = normalise_variable(variable, axis=0)
+                if self.interventions:
+                    variable_obs = variable[: self.num_samples]
+                    variable_int = variable[self.num_samples :]
+                    var_obs_mean = np.mean(variable_obs)
+                    var_obs_std = np.std(variable_obs)
+                    variable_obs = normalise_variable(variable_obs, axis=0)
+                    variable_int = (variable_int - var_obs_mean) / var_obs_std
+                else:
+                    # variable_obs = variable_normed
+                    variable_obs = variable
 
             data[:, i] = variable_obs
-        return data
+            if self.interventions:
+                interventional_data[:, i] = variable_int
+            else:
+                pass
+
+        return data, interventional_data
 
     @abstractmethod
     def generate_functions(
@@ -296,11 +327,12 @@ class GPLVMFunctionGenerator(DataGenerator):
         Returns:
         ----------
         data : np.ndarray (num_samples, num_variables)
+        interventional_data : np.ndarray (num_interventions, num_variables)
         """
-        data = self.generate_data(
+        data, interventional_data = self.generate_data(
             causal_graph=causal_graph
         )
-        return data
+        return data, interventional_data
 
     def generate_functions(
         self,
@@ -380,10 +412,10 @@ class GPFunctionGenerator(DataGenerator):
         data : np.ndarray (num_samples, num_variables)
         interventional_data : np.ndarray (num_interventions, num_variables)
         """
-        data = self.generate_data(
+        data, interventional_data = self.generate_data(
             causal_graph=causal_graph
         )
-        return data
+        return data, interventional_data
 
     def generate_functions(
         self,
@@ -432,22 +464,179 @@ class GPFunctionGenerator(DataGenerator):
         return function_dict
 
 
-class LinearFunctionGenerator(DataGenerator):
+class GPLVMFixedHyperparam(GPLVMFunctionGenerator):
+    """
+    Generates from a GPLVM but with fixed hyperaparameters that are the result
+    of GPLVM experiments.
 
-    def return_data(self, causal_graph: np.ndarray) -> np.ndarray:
-        data = self.generate_data(
-            causal_graph=causal_graph
+    Args:
+    ----------
+    num_variables : int
+        Number of variables to generate.
+
+    num_samples : int
+        Number of samples to generate.
+
+    lengthscale_fixed : bool
+        Whether to fix the lengthscale distrbution or draw its parameters from
+        another distribution.
+
+    lengthscale_gamma_vals : list
+
+    sample_hyperparams_collectively : bool
+        Whether the hyperparameters should be sampled together or one by one.
+    """
+
+    def __init__(
+        self,
+        num_variables: int,
+        num_samples: int,
+        interventions: bool = False,
+        lengthscale_fixed: bool = False,
+        lengthscale_gamma_vals: list = [1.0, 1.0],
+        kernel_sum: bool = False,
+        mean_function: str = "latent",
+        sample_hyperparams_collectively: bool = False,
+        sample_hyperparam_index: Optional[int] = None,
+    ):
+        super().__init__(
+            num_variables,
+            num_samples,
+            interventions,
+            lengthscale_fixed,
+            lengthscale_gamma_vals,
+            kernel_sum,
+            mean_function,
         )
-        return data
+        self.sample_hyperparams_collectively = sample_hyperparams_collectively
+        self.sample_hyperparam_index = sample_hyperparam_index
+
+    def load_hyperparams(self):
+        work_dir = Path(__file__).parent.parent
+        marginal_hyperparam_dir = (
+            work_dir
+            / "experiments/gplvm_experiments/results/marginal_hyperparams.p"
+        )
+        condtional_hyperparam_dir = (
+            work_dir
+            / "experiments/gplvm_experiments/results/conditional_hyperparams.p"
+        )
+        with open(marginal_hyperparam_dir, "rb") as f:
+            marginal_hyperparams = dill.load(f)
+        with open(condtional_hyperparam_dir, "rb") as f:
+            conditional_hyperparams = dill.load(f)
+        # kernel lengthscale, kernel variance, likelihood variance
+        return marginal_hyperparams, conditional_hyperparams
+
+    def sample_hyperparams(self, param_list):
+        param_choice = random.choice(param_list)
+        sample = np.random.normal(loc=param_choice, scale=0.01)
+        # Need to make sure hyperparam is positive
+        sample_fix = np.maximum(sample, 0.001)
+        return sample_fix
+
+    def get_hyerparams(self, marginal=False):
+        marginal_hyperparams, conditional_hyperparams = self.load_hyperparams()
+        if marginal:
+            lengthscale = self.sample_hyperparams(
+                marginal_hyperparams["lengthscale"]
+            )
+            kern_var = self.sample_hyperparams(
+                marginal_hyperparams["kern_variance"]
+            )
+            like_var = self.sample_hyperparams(
+                marginal_hyperparams["like_variance"]
+            )
+        else:
+            lengthscale = self.sample_hyperparams(
+                conditional_hyperparams["lengthscale"]
+            )
+            kern_var = self.sample_hyperparams(
+                conditional_hyperparams["kern_variance"]
+            )
+            like_var = self.sample_hyperparams(
+                conditional_hyperparams["like_variance"]
+            )
+        # Convert to the right dtype
+        lengthscale = np.array(lengthscale, dtype=default_float())
+        kern_var = np.array(kern_var, dtype=default_float())
+        like_var = np.array(like_var, dtype=default_float())
+        return lengthscale, kern_var, like_var
+
+    def get_collective_hyerparams(self, marginal=False, index=None):
+        marginal_hyperparams, conditional_hyperparams = self.load_hyperparams()
+        # Sample the same hyperparam index from all the lists
+        if index is None:
+            hyperparam_index = random.choice(range(len(marginal_hyperparams["lengthscale"])))
+        else:
+            hyperparam_index = index
+            assert hyperparam_index < len(marginal_hyperparams["lengthscale"]), f"Index {hyperparam_index} is out of range!"
+        if marginal:
+            lengthscale = marginal_hyperparams["lengthscale"][hyperparam_index]
+            kern_var = marginal_hyperparams["kern_variance"][hyperparam_index]
+            like_var = marginal_hyperparams["like_variance"][hyperparam_index]
+        else:
+            lengthscale = conditional_hyperparams["lengthscale"][hyperparam_index]
+            kern_var = conditional_hyperparams["kern_variance"][hyperparam_index]
+            like_var = conditional_hyperparams["like_variance"][hyperparam_index]
+        # Sample around the valued
+        lengthscale = np.random.normal(loc=lengthscale, scale=0.001)
+        lengthscale = np.maximum(lengthscale, 0.0001)
+        kern_var = np.random.normal(loc=kern_var, scale=0.001)
+        kern_var = np.maximum(kern_var, 0.0001)
+        like_var = np.random.normal(loc=like_var, scale=0.001)
+        like_var = np.maximum(like_var, 0.0001)
+
+        # Convert to the right dtype
+        lengthscale = np.array(lengthscale, dtype=default_float())
+        kern_var = np.array(kern_var, dtype=default_float())
+        like_var = np.array(like_var, dtype=default_float())
+        return lengthscale, kern_var, like_var
 
     def generate_functions(
         self,
         causal_graph: np.ndarray,
     ) -> dict:
+        """
+        Generate functions given a causal graph.
+
+        This will instantiate a class that can then be used to generate data.
+        This is necessary as we have to save the functions to generate
+        interventional data.
+        """
         function_dict = {}
         for i in range(self.number_of_variables):
-            function = LinearFunctions(no_latent=True)
+            parents_of_i = causal_graph[:, i]
+            # Plus one for latent variable.
+            num_parents = int(np.sum(parents_of_i) + 1)
+
+            # Set kernel
+            marginal = True if np.sum(parents_of_i) == 0 else False
+            if self.sample_hyperparam_index is not None:
+                lengthscale, kern_var, like_var = self.get_collective_hyerparams(
+                    marginal=marginal,
+                    index=self.sample_hyperparam_index,
+                )
+            elif self.sample_hyperparams_collectively:
+                # sample hyperparams collectively
+                lengthscale, kern_var, like_var = self.get_collective_hyerparams(
+                    marginal=marginal
+                )
+            else:
+                # sample hyperparams one by one
+                lengthscale, kern_var, like_var = self.get_hyerparams(
+                    marginal=marginal
+                )
+
+            kernel = gpflow.kernels.SquaredExponential(
+                variance=kern_var,
+                lengthscales=lengthscale,
+            )
+
+            function = GPLVMFunctions(
+                mean=self.mean_function,
+                kernel=kernel,
+                likelihood_variance=like_var,
+            )
             function_dict[i] = function
         return function_dict
-
-

@@ -63,7 +63,7 @@ def hpc_main(args):
 
 
 def hpc_classify_main(args):
-    name = f"gplvm_20var_ERL{args.exp_edges_lower}_ERU{args.exp_edges_upper}"
+    name = f"gplvm_20var"
     usecase = args.folder_name
     # Rest of the code...
     num_vars = 20
@@ -167,13 +167,13 @@ if __name__ == "__main__":
         "--exp_edges_upper",
         "-eeu",
         type=int,
-        default=60,
+        default=20,
     )
     parser.add_argument(
         "--exp_edges_lower",
         "-eel",
         type=int,
-        default=10,
+        default=20,
     )
     parser.add_argument(
         "--folder_name",
