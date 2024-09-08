@@ -13,4 +13,4 @@ python3 /rds/general/user/ad6013/home/Research/CausalStructureNeuralProcess/ml2_
     --work_dir="/rds/general/user/ad6013/home/Research/CausalStructureNeuralProcess/ml2_meta_causal_discovery" \
     --batch_size=20000 \
     --data_start=$PBS_ARRAY_INDEX \
-    --data_end=$PBS_ARRAY_INDEX+1
+    --data_end=$(($PBS_ARRAY_INDEX + 1))
