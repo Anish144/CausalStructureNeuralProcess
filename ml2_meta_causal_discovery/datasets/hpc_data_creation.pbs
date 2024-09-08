@@ -1,6 +1,6 @@
 #PBS -l walltime=48:00:00
-#PBS -l select=1:ncpus=32:mem=32gb
-#PBS -J 1-41
+#PBS -l select=1:ncpus=128:mem=64gb
+#PBS -J 1-100
 
 module load anaconda3/personal
 module load cuda/11.2.2
@@ -9,4 +9,8 @@ module load cudnn/8.2.4
 source activate np_causal
 cd $PBS_O_WORKDIR
 
-python3 /rds/general/user/ad6013/home/Research/ml2_meta_causal_discovery/ml2_meta_causal_discovery/datasets/create_save_synth_data.py
+python3 /rds/general/user/ad6013/home/Research/CausalStructureNeuralProcess/ml2_meta_causal_discovery/datasets/create_save_synth_data.py \
+    --work_dir="/rds/general/user/ad6013/home/Research/CausalStructureNeuralProcess/ml2_meta_causal_discovery" \
+    --batch_size=10000 \
+    --data_start=$PBS_ARRAY_INDEX \
+    --data_end=$PBS_ARRAY_INDEX+1

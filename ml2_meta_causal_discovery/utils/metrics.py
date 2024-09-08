@@ -3,6 +3,32 @@ from tqdm import trange
 import numpy as np
 from cdt.metrics import SHD
 from sklearn.metrics import f1_score
+import torch as th
+
+
+def cyclicity(A):
+    """
+    Code adapted from DiBS:
+    Differentiable acyclicity constraint from Yu et al. (2019). If h = 0 then the graph is acyclic.
+    http://proceedings.mlr.press/v97/yu19a/yu19a.pdf
+
+    Args:
+        mat (ndarray): graph adjacency matrix of shape ``[n_vars, n_vars]``
+        n_vars (int): number of variables, to allow for ``jax.jit``-compilation
+
+    Returns:
+        bool: True if the graph is cyclic, False otherwise
+    """
+    n_vars = A.shape[0]
+    # alpha = 1.0 / n_vars
+
+    # M = tf.add(tf.eye(n_vars, dtype=default_float()), alpha * A)
+
+    M_mult = th.linalg.matrix_exp(A)
+
+    h = th.trace(M_mult) - n_vars
+
+    return h
 
 
 def balance_for_auc(target, pred_scores):
@@ -94,7 +120,7 @@ def expected_shd(target, pred):
     pred: np.ndarray, shape (num_samples, batch_size, num_nodes, num_nodes)
     """
     shd_all = np.zeros(pred.shape[1])
-    for i in trange(pred.shape[1]):
+    for i in range(pred.shape[1]):
         # Select batch
         curr_pred = pred[:, i]
         curr_target = target[i]

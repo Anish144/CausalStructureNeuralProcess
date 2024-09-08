@@ -51,14 +51,14 @@ def sample_linear_gaussian_data(
     sample_size: int,
     num_datasets: int,
 ):
-    num_nodes = 3
+    num_nodes = 10
     datagenerator = ClassifyDatasetGenerator(
         num_variables=num_nodes,
         function_generator="linear",
         batch_size=num_datasets,
         num_samples=sample_size,
         graph_type="ER",
-        graph_degrees=[1, 2, 3]
+        graph_degrees=[10, 20]
     )
     data, causal_graphs = next(datagenerator.generate_next_dataset())[:]
     # Normalise the data along the 1st axis
@@ -115,7 +115,7 @@ def main(
         num_layers_decoder=4,
         device="cuda" if th.cuda.is_available() else "cpu",
         dtype=th.bfloat16,
-        num_nodes=3,
+        num_nodes=10,
         n_perm_samples=25,
         sinkhorn_iter=1000,
         use_positional_encoding=False,
@@ -147,7 +147,7 @@ def main(
             test_dataset=test_dataset,
             model=inst_model,
             optimizer=optimiser_part_init(inst_model.parameters()),
-            epochs=2,
+            epochs=1,
             batch_size=32,
             num_workers=12,
             lr_warmup_ratio=0.1, # Should be around 10% of the total steps
@@ -183,7 +183,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         '--num_datasets',
-        default=100000,
+        default=200000,
         type=int
     )
     args = parser.parse_args()

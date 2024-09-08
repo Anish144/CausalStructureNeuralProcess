@@ -90,13 +90,13 @@ class CausalClassifierTrainer:
             collate_fn=transformer_classifier_split(),
         )
         self.val_loader = th.utils.data.DataLoader(
-            self.validation_dataset, batch_size=self.batch_size // 2, shuffle=False,
+            self.validation_dataset, batch_size=4, shuffle=False,
             num_workers=self.num_workers, pin_memory=True,
             persistent_workers=True,
             collate_fn=transformer_classifier_split(),
         )
         self.test_loader = th.utils.data.DataLoader(
-            self.test_dataset, batch_size=self.batch_size // 2, shuffle=False,
+            self.test_dataset, batch_size=4, shuffle=False,
             num_workers=self.num_workers, pin_memory=True,
             persistent_workers=True,
             collate_fn=transformer_classifier_val_split(),

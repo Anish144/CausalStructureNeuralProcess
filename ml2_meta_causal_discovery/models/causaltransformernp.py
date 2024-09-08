@@ -58,7 +58,7 @@ class AviciDecoder(CausalTNPEncoder):
         self.decoder = nn.Identity()
 
         self.predictor = CausalAdjacencyMatrix(
-            nhead=nhead,
+            nhead=1, # There is only one head for the final prediction
             d_model=d_model,
             device=device,
             dtype=dtype,
@@ -121,7 +121,6 @@ class AviciDecoder(CausalTNPEncoder):
         samples = existence_dist.sample(
             sample_shape=(num_samples,)
         )
-        print(samples.size())
         return samples
 
 

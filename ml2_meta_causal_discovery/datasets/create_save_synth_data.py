@@ -142,7 +142,7 @@ if __name__ == "__main__":
         "--work_dir",
         "-wd",
         type=str,
-        default="/vol/bitbucket/ad6013/Research/ml2_meta_causal_discovery/ml2_meta_causal_discovery/",
+        default="/vol/bitbucket/ad6013/Research/CausalStructureNeuralProcess/ml2_meta_causal_discovery/",
         help="Folder where the Neural Process Family is stored.",
     )
     parser.add_argument(
