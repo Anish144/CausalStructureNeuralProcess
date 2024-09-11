@@ -22,14 +22,21 @@ from ml2_meta_causal_discovery.utils.train_classifier_model import (
 from functools import partial
 from ml2_meta_causal_discovery.datasets.dataset_generators import \
     ClassifyDatasetGenerator
-
+from functools import partial
 
 MODELS = {
-    "causal": CausalProbabilisticDecoder,
+    "causal_qbeforel": CausalProbabilisticDecoder,
     "csiva": CsivaDecoder,
     "avici": AviciDecoder,
-
 }
+
+# MODELS = {
+    # "causal_qbeforel": partial(CausalProbabilisticDecoder, Q_before_L=True),
+    # "causal_qafterl": partial(CausalProbabilisticDecoder, Q_before_L=False),
+    # "csiva": CsivaDecoder,
+    # "avici": AviciDecoder,
+# }
+
 
 
 def linear_kernel(X, sigma_f=2.0, sigma_n=0.5):
@@ -116,7 +123,7 @@ def main(
         device="cuda" if th.cuda.is_available() else "cpu",
         dtype=th.bfloat16,
         num_nodes=10,
-        n_perm_samples=25,
+        n_perm_samples=100,
         sinkhorn_iter=1000,
         use_positional_encoding=False,
     )
@@ -155,17 +162,22 @@ def main(
             save_dir=save_dir,
             use_wandb=False,
         )
+
         trainer.train()
         metric_dict = trainer.test_single_epoch(
             test_loader=trainer.test_loader,
             metric_dict={},
             calc_metrics=True,
+            num_samples=500,
         )
+
         print(f"Results for {model}: {metric_dict}")
         all_results[model] = metric_dict
+        del inst_model
+        del trainer
 
     # Save the results
-    with open(work_dir / "experiments" / "causal_classification" / "linear_gaussian" / "results.json", "w") as f:
+    with open(work_dir / "experiments" / "causal_classification" / "linear_gaussian" / "results_withqlbefore.json", "w") as f:
         json.dump(all_results, f)
 
     # Plot

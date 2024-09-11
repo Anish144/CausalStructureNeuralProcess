@@ -15,6 +15,8 @@ from ml2_meta_causal_discovery.utils.wandb import plot_perm_matrix
 from ml2_meta_causal_discovery.utils.metrics import (
     expected_shd,
     expected_f1_score,
+    log_prob_graph_scores,
+    auc_graph_scores,
 )
 
 
@@ -113,14 +115,13 @@ class CausalClassifierTrainer:
         else:
             pass
 
-    def test_single_epoch(self, test_loader, metric_dict, calc_metrics=False):
+    def test_single_epoch(self, test_loader, metric_dict, calc_metrics=False, num_samples=100):
         with th.no_grad():
             self.model.to("cuda")
             dtype = th.float32
             self.model.eval()
             self.model.to(dtype)
             all_loss = 0
-            all_preds = 0
             for i, data in enumerate(tqdm(test_loader, desc="Testing")):
                 # Get the inputs and targets
                 inputs, targets = data
@@ -136,28 +137,30 @@ class CausalClassifierTrainer:
                 all_loss += th.sum(loss).cpu().item()
                 if calc_metrics:
                     predictions = self.model.sample(
-                        inputs, num_samples=100
+                        inputs, num_samples=num_samples
                     )
                     e_shd = expected_shd(targets.cpu().detach().numpy(), predictions.cpu().detach().numpy())
                     e_f1 = expected_f1_score(targets.cpu().detach().numpy(), predictions.cpu().detach().numpy())
+                    auc = auc_graph_scores(targets, predictions)
+                    log_prob = log_prob_graph_scores(targets, predictions)
                     result = {
                         "e_shd": list(e_shd),
                         "e_f1": list(e_f1),
+                        "auc": list(auc),
+                        "log_prob": list(log_prob),
                     }
                     if "e_shd" in metric_dict:
                         metric_dict["e_shd"] += result["e_shd"]
                         metric_dict["e_f1"] += result["e_f1"]
+                        metric_dict["auc"] += result["auc"]
+                        metric_dict["log_prob"] += result["log_prob"]
                     else:
                         metric_dict.update(result)
-                # pred = (adj_logit > 0.5).double()
-                # all_preds += th.sum(pred == flat_target).cpu().item()
             # Log the test loss
-            # accuracy = all_preds / len(test_loader.dataset)
             loss = all_loss / len(test_loader.dataset)
             metric_dict.update(
                 {
                     "test_loss": loss,
-                    # "test_accuracy": accuracy,
                 }
             )
             dtype = th.bfloat16 if self.bfloat16 else th.float32
@@ -233,7 +236,6 @@ class CausalClassifierTrainer:
                         targets[i, 0, 1] = 1
                     else:
                         targets[i, 1, 0] = 1
-            # import pdb; pdb.set_trace()
 
             # Zero the parameter gradients
             self.optimizer.zero_grad()

@@ -159,3 +159,64 @@ def expected_f1_score(target, pred):
             f1_sample.append(f1)
         f1_all[i] = np.mean(f1_sample)
     return f1_all
+
+
+def log_prob_graph_scores(targets, preds):
+    """
+    Get log prob of Bernoulli score for a batch of predictions
+
+    Args:
+    -----
+    targets: torch.Tensor, shape (batch_size, num_nodes, num_nodes)
+        The target graph.
+    preds: torch.Tensor, shape (num_samples, batch_size, num_nodes, num_nodes)
+    """
+    all_log_probs = []
+    for batch_idx in range(targets.shape[0]):
+        # Take mean across the samples
+        # Shape (num_nodes, num_nodes)
+        sample_mean = th.mean(preds[:, batch_idx], axis=0)
+        # Shape (num_nodes ** 2)
+        sample_mean_flatten = sample_mean.flatten()
+        # Compute log prob of Bernoulli
+        current_batch = targets[batch_idx]
+        current_batch_flatten = current_batch.flatten()
+
+        bern_dist = th.distributions.bernoulli.Bernoulli(
+            probs=sample_mean_flatten,
+        )
+        # Sum log probs over edges
+        log_prob = bern_dist.log_prob(current_batch_flatten).sum()
+        all_log_probs.append(log_prob.cpu().item())
+    return all_log_probs
+
+
+def auc_graph_scores(targets, preds):
+    """
+    Get mean auc score for a batch of predictions
+
+    Args:
+    -----
+    targets: torch.Tensor, shape (batch_size, num_nodes, num_nodes)
+        The target graph.
+    preds: torch.Tensor, shape (num_samples, batch_size, num_nodes, num_nodes)
+    """
+    if isinstance(targets, th.Tensor):
+        targets = targets.cpu().numpy()
+    if isinstance(preds, th.Tensor):
+        preds = preds.cpu().numpy()
+
+    all_aucs = []
+    for batch_idx in range(targets.shape[0]):
+        # Take mean across the samples to get the probs
+        # Shape (num_nodes, num_nodes)
+        sample_mean = np.mean(preds[:, batch_idx], axis=0)
+        # Shape (num_nodes ** 2)
+        sample_mean_flatten = sample_mean.flatten()
+        # Compute AUC
+        current_batch = targets[batch_idx]
+        current_batch_flatten = current_batch.flatten()
+        auc = roc_auc_score(current_batch_flatten, sample_mean_flatten, average="macro")
+        all_aucs.append(auc)
+    return all_aucs
+

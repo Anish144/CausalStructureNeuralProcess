@@ -324,6 +324,7 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
         n_perm_samples,
         sinkhorn_iter,
         use_positional_encoding,
+        Q_before_L=True, # Whether to infer Q (perm) before L (bernoulli)
         device=None,
         dtype=None,
         **kwargs,
@@ -343,6 +344,7 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
         self.num_nodes = num_nodes
         self.n_perm_samples = n_perm_samples
         self.sinkhorn_iter = sinkhorn_iter
+        self.Q_before_L = Q_before_L
         self.output_embedder = build_mlp(
             dim_in=1,
             dim_hid=d_model,
@@ -401,13 +403,22 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
         )
 
     def decode(self, representation, is_training=True):
-        # shape [batch_size, num_nodes, d_model]
-        L_rep = self.decoder_L(representation, memory=None)
-        # We will pass L_param into permutation
-        Q_rep = self.decoder_Q(L_rep, memory=None)
-        # shape [batch_size, num_nodes, num_nodes]
-        L_param = self.L_param(L_rep)
-        # Q_param = self.Q_param(Q_rep)
+        if not self.Q_before_L:
+            # shape [batch_size, nu`m_nodes, d_model]
+            L_rep = self.decoder_L(representation, memory=None)
+            # We will pass L_param into permutation
+            Q_rep = self.decoder_Q(L_rep, memory=None)
+            # shape [batch_size, num_nodes, num_nodes]
+            L_param = self.L_param(L_rep)
+            # Q_param = self.Q_param(Q_rep)
+        else:
+            # shape [batch_size, num_nodes, d_model]
+            Q_rep = self.decoder_Q(representation, memory=None)
+            # We will pass Q_param into L
+            L_rep = self.decoder_L(Q_rep, memory=None)
+            # shape [batch_size, num_nodes, num_nodes]
+            L_param = self.L_param(L_rep)
+            # Q_param = self.Q_param(Q_rep)
         return L_param, Q_rep
 
     def calculate_loss(self, probs, target):
