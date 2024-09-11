@@ -35,6 +35,7 @@ from gpflow.config import default_float
 import tensorflow as tf
 import tensorflow_probability as tfp
 from typing import Optional
+import torch as th
 
 
 class GPLVMFunctions:
@@ -128,6 +129,36 @@ class LinearFunctions:
             noise_hyper = np.random.gamma(shape=1.5, scale=2.5, size=(inputs.shape[0]))
             noise = np.random.normal(loc=0, scale=noise_hyper)
             return inputs @ weights + noise
+
+
+class NeuralNetFunction:
+
+    def __init__(self, num_parents: int, no_latent=False) -> None:
+        self.num_parents = num_parents
+        self.no_latent = no_latent
+        self.device = th.device("cuda" if th.cuda.is_available() else "cpu")
+
+        # Define the network
+        self.linear_1 = th.nn.Linear(num_parents, 32)
+        self.act_1 = th.nn.Tanh()
+        self.linear_2 = th.nn.Linear(32, 32)
+        self.act_2 = th.nn.Tanh()
+        self.linear_3 = th.nn.Linear(32, 1)
+        self.to(self.device)
+
+    def __call__(self, inputs: np.ndarray) -> np.ndarray:
+        """
+        Sample from an NN
+        """
+        assert inputs.shape[-1] == self.num_parents, "Incorrect input shape!"
+        with th.no_grad():
+            x = th.tensor(inputs, dtype=th.float32, device=self.device)
+            x = self.linear_1(x)
+            x = self.act_1(x)
+            x = self.linear_2(x)
+            x = self.act_2(x)
+            x = self.linear_3(x)
+            return x.detach().cpu().numpy()
 
 
 class DataGenerator(ABC):
@@ -451,3 +482,30 @@ class LinearFunctionGenerator(DataGenerator):
         return function_dict
 
 
+class NeuralNetFunctionGenerator(DataGenerator):
+    """
+    Generate data by passing a uniform [-1, 1] latent along with inputs
+    into a random 2 layer neural network.
+    """
+
+    def return_data(self, causal_graph: np.ndarray) -> np.ndarray:
+        data = self.generate_data(
+            causal_graph=causal_graph
+        )
+        return data
+
+    def generate_functions(
+        self,
+        causal_graph: np.ndarray,
+    ) -> dict:
+        function_dict = {}
+        for i in range(self.number_of_variables):
+            parents_of_i = causal_graph[:, i]
+            # Plus one for latent variable.
+            num_parents = int(np.sum(parents_of_i) + 1)
+            function = NeuralNetFunction(
+                no_latent=False,
+                num_parents=num_parents
+            )
+            function_dict[i] = function
+        return function_dict
