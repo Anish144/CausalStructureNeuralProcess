@@ -131,18 +131,19 @@ class LinearFunctions:
             return inputs @ weights + noise
 
 
-class NeuralNetFunction:
+class NeuralNetFunction(th.nn.Module):
 
     def __init__(self, num_parents: int, no_latent=False) -> None:
+        super(NeuralNetFunction, self).__init__()
         self.num_parents = num_parents
         self.no_latent = no_latent
         self.device = th.device("cuda" if th.cuda.is_available() else "cpu")
 
         # Define the network
         self.linear_1 = th.nn.Linear(num_parents, 32)
-        self.act_1 = th.nn.Tanh()
+        self.act_1 = th.nn.LeakyReLU()
         self.linear_2 = th.nn.Linear(32, 32)
-        self.act_2 = th.nn.Tanh()
+        self.act_2 = th.nn.LeakyReLU()
         self.linear_3 = th.nn.Linear(32, 1)
         self.to(self.device)
 
@@ -158,7 +159,7 @@ class NeuralNetFunction:
             x = self.linear_2(x)
             x = self.act_2(x)
             x = self.linear_3(x)
-            return x.detach().cpu().numpy()
+            return x.detach().cpu().numpy().squeeze(-1)
 
 
 class DataGenerator(ABC):

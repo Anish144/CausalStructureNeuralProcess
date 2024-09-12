@@ -139,10 +139,10 @@ class CausalClassifierTrainer:
                     predictions = self.model.sample(
                         inputs, num_samples=num_samples
                     )
+                    auc = auc_graph_scores(targets, predictions)
+                    log_prob = log_prob_graph_scores(targets, predictions.to(targets.device))
                     e_shd = expected_shd(targets.cpu().detach().numpy(), predictions.cpu().detach().numpy())
                     e_f1 = expected_f1_score(targets.cpu().detach().numpy(), predictions.cpu().detach().numpy())
-                    auc = auc_graph_scores(targets, predictions)
-                    log_prob = log_prob_graph_scores(targets, predictions)
                     result = {
                         "e_shd": list(e_shd),
                         "e_f1": list(e_f1),
@@ -227,15 +227,8 @@ class CausalClassifierTrainer:
             targets = targets.to("cuda", dtype=dtype)
             inputs = inputs.to("cuda",  dtype=dtype)
 
-            if targets.dim() == 1:
-                targets = th.zeros(
-                    (targets.shape[0], 2, 2), device=targets.device, dtype=targets.dtype
-                )
-                for i in range(targets.shape[0]):
-                    if targets[i] == 1:
-                        targets[i, 0, 1] = 1
-                    else:
-                        targets[i, 1, 0] = 1
+            # Normaliser the inputs across axis 1
+            inputs = (inputs - inputs.mean(dim=1, keepdim=True)) / inputs.std(dim=1, keepdim=True)
 
             # Zero the parameter gradients
             self.optimizer.zero_grad()

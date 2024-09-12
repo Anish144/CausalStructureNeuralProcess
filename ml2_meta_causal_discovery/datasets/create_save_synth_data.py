@@ -8,12 +8,13 @@ import numpy as np
 from tqdm import tqdm, trange
 
 from ml2_meta_causal_discovery.datasets.dataset_generators import \
-    DatasetGenerator, ClassifyDatasetGenerator
+    ClassifyDatasetGenerator
 from ml2_meta_causal_discovery.utils.datautils import \
     turn_bivariate_causal_graph_to_label
 
 import h5py
 from pathlib import Path
+import json
 
 
 def hpc_main(args):
@@ -63,11 +64,11 @@ def hpc_main(args):
 
 
 def hpc_classify_main(args):
-    name = f"gplvm_20var"
+    name = f"neuralnet_20var_ERL{args.exp_edges_lower}U{args.exp_edges_upper}"
     usecase = args.folder_name
     # Rest of the code...
     num_vars = 20
-    function_gen = "gplvm"
+    function_gen = "neuralnet"
     num_samples = 1000
     graph_type = "ER"
     exp_edges_upper = args.exp_edges_upper
@@ -96,7 +97,7 @@ def hpc_classify_main(args):
         with h5py.File(save_folder / f'{name}_{i}.hdf5', 'w') as f:
             dset = f.create_dataset("data", data=target_data)
             dset = f.create_dataset("label", data=causal_graphs)
-        with open(save_folder / "graph_args.pkl", "wb") as f:
+        with open(save_folder / "graph_args.json", "w") as f:
             graph_args = {
                 "graph_type": graph_type,
                 "graph_degrees_upper": exp_edges_upper,
@@ -105,7 +106,7 @@ def hpc_classify_main(args):
                 "num_samples": num_samples,
                 "function_generator": function_gen,
             }
-            dill.dump(graph_args, f)
+            json.dump(graph_args, f)
 
 
 if __name__ == "__main__":

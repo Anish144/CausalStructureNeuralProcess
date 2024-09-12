@@ -206,12 +206,12 @@ class CsivaDecoder(CausalTNPEncoder):
             num_nodes = representation.size(1)
             adj_size = num_nodes ** 2
             # shape [batch_size, 1, 1]
-            tgt_input = torch.ones_like(representation[:, 0:1, 0:1]) * -1
+            tgt_input = torch.ones_like(representation[:, 0:1, 0:1], device=representation.device) * -1
             while True:
                 # shape [batch_size, loop_iteration, d_model]
                 tgt_emb = self.output_embedder(tgt_input)
                 # Same tgt_mask in validation as for training
-                tgt_mask = torch.zeros((tgt_emb.size(1), tgt_emb.size(1)), device=tgt_emb.device).fill_(float('-inf'))
+                tgt_mask = torch.zeros((tgt_emb.size(1), tgt_emb.size(1))).fill_(float('-inf')).to(representation.device)
                 tgt_mask = tgt_mask.triu_(1)
                 # size of decoder rep will be [batch, tgt_input.size(1), d_model]
                 decoder_rep = self.decoder(
@@ -301,7 +301,8 @@ class CsivaDecoder(CausalTNPEncoder):
             samples: torch.Tensor, shape [num_samples, batch_size, num_nodes, num_nodes]
         """
         all_samples = torch.zeros(
-            (num_samples, target_data.size(0), target_data.size(-1), target_data.size(-1))
+            (num_samples, target_data.size(0), target_data.size(-1), target_data.size(-1)),
+            device=target_data.device,
         )
         for i in range(num_samples):
             _, sample = self.forward(target_data, graph=None, is_training=False)
