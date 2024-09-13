@@ -26,7 +26,7 @@ python3 /gpfs/home/ad6013/Research/CausalStructureNeuralProcess/ml2_meta_causal_
     --dim_model=$DM \
     --dim_feedforward=$DF \
     --decoder=$MT \
-    --seed=0 \
+    --seed=1 \
     --lr_warmup_ratio=0.1 \
     --num_nodes=20 \
     --nhead=$NH \
