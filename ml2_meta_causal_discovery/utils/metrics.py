@@ -1,7 +1,6 @@
 from sklearn.metrics import roc_auc_score
 from tqdm import trange
 import numpy as np
-from cdt.metrics import SHD
 from sklearn.metrics import f1_score
 import torch as th
 
@@ -106,7 +105,8 @@ def calc_SHD(target, pred, double_for_anticausal=True):
         >>> tar, pred = randint(2, size=(10, 10)), randint(2, size=(10, 10))
         >>> SHD(tar, pred, double_for_anticausal=False)
     """
-    return SHD(target, pred, double_for_anticausal=double_for_anticausal)
+    diff = np.abs(target - pred)
+    return np.sum(diff)
 
 
 def expected_shd(target, pred):
