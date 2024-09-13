@@ -8,11 +8,7 @@ from pathlib import Path
 import wandb
 import numpy as np
 import torch
-from torch.utils.data import TensorDataset
 
-from ml2_meta_causal_discovery.datasets.data.cha_pairs.generate_cha_pairs import (
-    ChaPairs,
-)
 from ml2_meta_causal_discovery.utils.args import retun_default_args
 from ml2_meta_causal_discovery.utils.datautils import MultipleFileDataset
 from ml2_meta_causal_discovery.utils.train_classifier_model import (
@@ -144,8 +140,6 @@ def npf_main(args):
 if __name__ == "__main__":
     # Log into weights and biases
     wandb.login(key="bc359b26d166ea6980eb0e231060bd7b8c06925e")
-
-    torch.set_default_dtype(torch.float32)
 
     parser = argparse.ArgumentParser()
     args = retun_default_args(parser)
