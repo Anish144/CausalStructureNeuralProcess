@@ -248,7 +248,7 @@ class CausalClassifierTrainer:
                     # don't do validation with autoregressive as its too expensive
                     if self.model.__class__.__name__ != "CausalAutoregressiveDecoder":
                         metric_dict = self.validate_single_epoch(val_loader, metric_dict)
-                    metric_dict = self.test_single_epoch(test_loader, metric_dict)
+                        metric_dict = self.test_single_epoch(test_loader, metric_dict)
                 if self.use_wandb:
                     wandb.log(metric_dict)
             pbar.set_description(

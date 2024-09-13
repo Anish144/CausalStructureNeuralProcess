@@ -30,8 +30,10 @@ python3 /gpfs/home/ad6013/Research/CausalStructureNeuralProcess/ml2_meta_causal_
     --lr_warmup_ratio=0.1 \
     --num_nodes=20 \
     --nhead=$NH \
-    --n_perm_samples=25 \
+    --n_perm_samples=100 \
     --sinkhorn_iter=1000 \
 
 python3 /gpfs/home/ad6013/Research/CausalStructureNeuralProcess/ml2_meta_causal_discovery/experiments/causal_classification/test_causal_classify.py \
     --model-list=$RUN_NAME \
+    --decoder=$MT \
+    --work_dir="/gpfs/home/ad6013/Research/CausalStructureNeuralProcess/ml2_meta_causal_discovery/" \

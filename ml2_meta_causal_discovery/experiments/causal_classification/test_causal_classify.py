@@ -5,18 +5,19 @@ from pathlib import Path
 from ml2_meta_causal_discovery.utils.datautils import MultipleFileDataset
 import json
 from ml2_meta_causal_discovery.models.causaltransformernp import (
-    CausalTNPDecoder,
-    CausalAutoregressiveDecoder,
+    CsivaDecoder,
+    AviciDecoder,
     CausalProbabilisticDecoder,
 )
 import torch as th
 from ml2_meta_causal_discovery.utils.datautils import (
     transformer_classifier_split,
-    transformer_classifier_val_split,
 )
 from ml2_meta_causal_discovery.utils.metrics import (
     expected_shd,
     expected_f1_score,
+    log_prob_graph_scores,
+    auc_graph_scores,
 )
 import numpy as np
 import argparse
@@ -50,71 +51,74 @@ def main(
 
     if module == "probabilistic":
         model = CausalProbabilisticDecoder(**config)
+    elif args.decoder == "autoregressive":
+        module = CsivaDecoder(**config)
+    elif args.decoder == "transformer":
+        module = AviciDecoder(**config)
 
     model.load_state_dict(th.load(model_dir / "model_1.pt"))
     model = model.eval().to("cuda")
 
     # Load data
     test_loader = th.utils.data.DataLoader(
-        dataset, batch_size=32, shuffle=False,
+        dataset, batch_size=2, shuffle=False,
         num_workers=12, pin_memory=True,
         persistent_workers=False,
         collate_fn=transformer_classifier_split(),
     )
 
     # Get the predictions
-    predictions = []
-    targets = []
+    metric_dict = {}
     for data in test_loader:
         x, y = data
         x = x.to("cuda")
-        y = y.to("cuda")
+        targets = y.to("cuda")
         with th.no_grad():
-            logits = model.sample(x, num_samples=num_samples)
-            predictions.append(logits.cpu().numpy())
-            targets.append(y.cpu().numpy())
-    # concat the predictions
-    # pred: (num_samples, batch_size, num_nodes, num_nodes)
-    predictions = np.concatenate(predictions, axis=-3)
-    # target: (batch_size, num_nodes, num_nodes)
-    targets = np.concatenate(targets, axis=-3)
+            pred_samples = model.sample(x, num_samples=num_samples)
+            auc = auc_graph_scores(targets, pred_samples)
+            log_prob = log_prob_graph_scores(targets, pred_samples.to(targets.device))
+            e_shd = expected_shd(targets.cpu().detach().numpy(), pred_samples.cpu().detach().numpy())
+            e_f1 = expected_f1_score(targets.cpu().detach().numpy(), pred_samples.cpu().detach().numpy())
+            result = {
+                "e_shd": list(e_shd),
+                "e_f1": list(e_f1),
+                "auc": list(auc),
+                "log_prob": list(log_prob),
+            }
+            if "e_shd" in metric_dict:
+                metric_dict["e_shd"] += result["e_shd"]
+                metric_dict["e_f1"] += result["e_f1"]
+                metric_dict["auc"] += result["auc"]
+                metric_dict["log_prob"] += result["log_prob"]
+            else:
+                metric_dict.update(result)
 
-    # Compute metrics
-    e_shd = expected_shd(targets, predictions)
-    e_f1 = expected_f1_score(targets, predictions)
-    result = {
-        "e_shd": list(e_shd),
-        "e_f1": list(e_f1),
-    }
     with open(model_dir / f"{data_file}_results.json", "w") as f:
-        json.dump(result, f)
-    pass
+        json.dump(metric_dict, f)
 
+    del test_loader
+    del model
 
 if __name__ == "__main__":
-    work_dir = Path(__file__).absolute().parent.parent.parent
-
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_list', type=list_of_strings)
     args = parser.parse_args()
 
-    module = "probabilistic"
-    num_samples = 100
+    num_samples = 500
 
     data_files = [
-        "gplvm_20var",
-        "gplvm_20var_ER10",
-        "gplvm_20var_ER40",
-        "gplvm_20var_ERL10_ERU60",
+        "neuralnet_20var_ER20",
+        "neuralnet_20var_ER40",
+        "neuralnet_20var_ER60",
+        "neuralnet_20var_ERL20U60",
     ]
-
 
     for data in data_files:
         for model in args.model_list:
             main(
-                work_dir=work_dir,
+                work_dir=Path(args.work_dir),
                 data_file=data,
                 model_name=model,
-                module=module,
+                module=args.decoder,
                 num_samples=num_samples,
             )
