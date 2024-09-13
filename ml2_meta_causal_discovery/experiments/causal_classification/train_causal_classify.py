@@ -19,8 +19,8 @@ from ml2_meta_causal_discovery.utils.train_classifier_model import (
     CausalClassifierTrainer,
 )
 from ml2_meta_causal_discovery.models.causaltransformernp import (
-    CausalTNPDecoder,
-    CausalAutoregressiveDecoder,
+    AviciDecoder,
+    CsivaDecoder,
     CausalProbabilisticDecoder,
 )
 import random
@@ -71,9 +71,9 @@ def npf_main(args):
     if args.decoder == "probabilistic":
         module = CausalProbabilisticDecoder
     elif args.decoder == "autoregressive":
-        module = CausalAutoregressiveDecoder
+        module = CsivaDecoder
     elif args.decoder == "transformer":
-        module = CausalTNPDecoder
+        module = AviciDecoder
     else:
         raise ValueError(
             "Decoder must be either probabilistic, autoregressive or transformer"
@@ -84,28 +84,6 @@ def npf_main(args):
         **TNPD_KWARGS,
     )
     print("Training:", model_1d())
-
-    # Validation dataset
-    x, y, _, target = ChaPairs(
-        work_dir / "datasets/data/cha_pairs/files"
-    ).return_pairs()
-    # Take only 500 samples to ensure in distribution
-    # Normalise the data
-    x = (x - x.mean(axis=1)[:, None, :]) / x.std(axis=1)[:, None, :]
-    y = (y - y.mean(axis=1)[:, None, :]) / y.std(axis=1)[:, None, :]
-    full_inputs = np.concatenate([x, y], axis=-1)
-    # need to turn target into boolean values
-    target = np.where(target == 1, 1.0, 0.0)
-    # convert target into a graph
-    target_graph = np.zeros((target.shape[0], 2, 2))
-    for i in range(target.shape[0]):
-        if target[i] == 1:
-            target_graph[i, 0, 1] = 1
-        else:
-            target_graph[i, 1, 0] = 1
-    test_dataset = TensorDataset(
-        torch.from_numpy(full_inputs), torch.from_numpy(target_graph)
-    )
 
     optimiser = getattr(torch.optim, args.optimizer)
     optimiser_part_init = partial(
@@ -137,7 +115,7 @@ def npf_main(args):
     trainer = CausalClassifierTrainer(
         train_dataset=dataset,
         validation_dataset=val_dataset,
-        test_dataset=test_dataset,
+        test_dataset=val_dataset,
         model=model,
         optimizer=optimiser_part_init(model.parameters()),
         epochs=args.max_epochs,
@@ -148,6 +126,18 @@ def npf_main(args):
         save_dir=save_dir,
     )
     trainer.train()
+    metric_dict = trainer.test_single_epoch(
+        test_loader=trainer.test_loader,
+        metric_dict={},
+        calc_metrics=True,
+        num_samples=500,
+    )
+
+    result_folder = work_dir / "experiments" / "causal_classification" / "results"
+    result_folder.mkdir(parents=True, exist_ok=True)
+    # Save the results
+    with open(work_dir / f"{args.run_name}.json", "w") as f:
+        json.dump(metric_dict, f)
     pass
 
 
