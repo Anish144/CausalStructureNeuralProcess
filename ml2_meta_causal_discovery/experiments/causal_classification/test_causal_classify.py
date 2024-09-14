@@ -19,8 +19,8 @@ from ml2_meta_causal_discovery.utils.metrics import (
     log_prob_graph_scores,
     auc_graph_scores,
 )
-import numpy as np
 import argparse
+from ml2_meta_causal_discovery.utils.args import retun_default_args
 
 
 def list_of_strings(arg):
@@ -52,9 +52,9 @@ def main(
     if module == "probabilistic":
         model = CausalProbabilisticDecoder(**config)
     elif args.decoder == "autoregressive":
-        module = CsivaDecoder(**config)
+        model = CsivaDecoder(**config)
     elif args.decoder == "transformer":
-        module = AviciDecoder(**config)
+        model = AviciDecoder(**config)
 
     model.load_state_dict(th.load(model_dir / "model_1.pt"))
     model = model.eval().to("cuda")
@@ -100,9 +100,10 @@ def main(
     del model
 
 if __name__ == "__main__":
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_list', type=list_of_strings)
-    args = parser.parse_args()
+    args = retun_default_args(parser)
 
     num_samples = 500
 

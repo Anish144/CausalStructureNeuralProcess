@@ -64,15 +64,19 @@ def hpc_main(args):
 
 
 def hpc_classify_main(args):
-    name = f"neuralnet_20var_ERL{args.exp_edges_lower}U{args.exp_edges_upper}"
+    num_vars = 20
+    function_gen = "linear"
     usecase = args.folder_name
     # Rest of the code...
-    num_vars = 20
-    function_gen = "neuralnet"
     num_samples = 1000
     graph_type = "ER"
     exp_edges_upper = args.exp_edges_upper
     exp_edges_lower = args.exp_edges_lower
+
+    if exp_edges_upper == exp_edges_lower:
+        name = f"{function_gen}_{num_vars}var_ER{args.exp_edges_lower}"
+    else:
+        name = f"{function_gen}_{num_vars}var_ERL{args.exp_edges_lower}U{args.exp_edges_upper}"
 
     dataset_generator = ClassifyDatasetGenerator(
         num_variables=num_vars,

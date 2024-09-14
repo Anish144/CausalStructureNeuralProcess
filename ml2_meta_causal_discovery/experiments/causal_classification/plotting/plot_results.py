@@ -48,53 +48,41 @@ def plot_results(results: dict, model_key: dict, data_name: str):
     matplotlib.rcParams['mathtext.bf'] = 'Times New Roman:bold'
 
     # Variables to plot with their corresponding arrows
-    variables = [('e_shd', '\u2193'), ('e_f1', '\u2191')]
+    variables = [('e_shd', '\u2193'), ('e_f1', '\u2191'), ('auc', '\u2191'), ('log_prob', '\u2191')]
 
-    fig, axs = plt.subplots(1, len(variables), figsize=(20, 5))  # Adjust the figure size to be appropriate for multiple plots
+    # Create a larger figure for multiple subplots
+    fig, axs = plt.subplots(1, len(variables), figsize=(24, 6))  # Adjust the figure size to be appropriate for multiple plots
+    fig.subplots_adjust(wspace=0.4)  # Add space between subplots
 
-    # Iterate over each category
+    for var, arrow in variables:
+        # Create a separate figure for each variable
+        fig, ax = plt.subplots(figsize=(10, 6))  # Adjust the figure size for each plot
 
-    # Filter the DataFrame for the current data category
-    # data_filtered = all_results
-
-    # print(data_filtered)
-
-    # Create a plot for each variable
-    for i, (var, arrow) in enumerate(variables):
-        # plt.figure(figsize=(10, 6))  # Adjust the figure size to be appropriate for one plot
-
-        ax = sns.boxplot(x='model', y=var, hue='model', data=results, palette=palette, linewidth=2.5,
-                        ax=axs[i], medianprops={'color': 'red', 'linewidth': 2.5})  # Set median line color to red
+        # Boxplot for each variable
+        sns.boxplot(x='model', y=var, hue='model', data=results, palette=palette, linewidth=2.5,
+                    medianprops={'color': 'red', 'linewidth': 2.5}, ax=ax)  # Set median line color to red
         ax.set_title(f'{var} {arrow} for 3 Variable', fontsize=22)
         ax.set_xlabel('', fontsize=22)
-        ax.set_ylabel("", fontsize=22)
+        ax.set_ylabel(var, fontsize=22)
 
-        # Adjusting the x-axis labels
+        # Adjust the x-axis labels
         labels = results['model'].unique()
         labels = [model_key[label] for label in labels]
-        ax.set_xticks(np.arange(len(labels)) + 0.25)
         formatted_labels = [label if label not in ['CGP-CDE', 'DGP-CDE'] else f'$\\bf{{{f"{label}"}}}$' for label in labels]
-        ax.set_xticklabels(formatted_labels, rotation=45, ha='right', fontsize=22)
-        ax.tick_params(axis='x', labelsize=22)
-        ax.tick_params(axis='y', labelsize=22)
-        # ax.set_xticks(range(len(labels)))
-        # ax.set_xticklabels([label.get_text() for label in labels], rotation=45, ha='right', fontsize=16)  # Rotate labels and increase font size
+        ax.set_xticks(np.arange(len(labels)) + 0.25)
+        ax.set_xticklabels(formatted_labels, rotation=45, ha='right', fontsize=16)  # Rotate x-labels
+        ax.tick_params(axis='x', labelsize=16)
+        ax.tick_params(axis='y', labelsize=16)
 
-        # axs[i].yticks(fontsize=16)
-        # plt.tight_layout()
+        # Remove the legend to avoid overlap
+        ax.get_legend().remove()
 
-        # plt.legend(title='Model', loc='upper right', fontsize=16)
-
-        # Save the plot with high resolution
-        plt.savefig(
-            Path(__file__).absolute().parent / f'{data_name}_Boxplot_LR.png',
-            format='png',
-            dpi=300,
-            bbox_inches='tight'
-        )
+        # Save each plot as a high-resolution image
+        output_path = Path(__file__).absolute().parent / f'{data_name}_{var}_Boxplot.png'
+        plt.savefig(output_path, format='png', dpi=300, bbox_inches='tight')
 
         # Show the plot
-    plt.show()
+        plt.show()
 
 
 def main(
@@ -117,12 +105,22 @@ def main(
     for key in results:
         results[key]['e_shd'] = clean_and_convert(results[key]['e_shd'])
         results[key]['e_f1'] = clean_and_convert(results[key]['e_f1'])
+        results[key]['auc'] = clean_and_convert(results[key]['auc'])
+        results[key]['log_prob'] = clean_and_convert(results[key]['log_prob'])
 
     # Create a DataFrame for plotting
     all_results = []
     for key, metrics in results.items():
         for i in range(len(metrics['e_shd'])):
-            all_results.append({'model': key, 'e_shd': metrics['e_shd'][i], 'e_f1': metrics['e_f1'][i]})
+            all_results.append(
+                {
+                    'model': key,
+                    'e_shd': metrics['e_shd'][i],
+                    'e_f1': metrics['e_f1'][i],
+                    'auc': metrics['auc'][i],
+                    'log_prob': metrics['log_prob'][i],
+                }
+            )
     df = pd.DataFrame(all_results)
 
     plot_results(
@@ -137,36 +135,33 @@ if __name__ == "__main__":
 
     # Need this to load the results
     data_files = [
-        "gplvm_20var",
-        "gplvm_20var_ER10",
-        "gplvm_20var_ER40",
-        "gplvm_20var_ERL10_ERU60",
+        "neuralnet_20var_ER20",
+        "neuralnet_20var_ER40",
+        "neuralnet_20var_ER60",
+        "neuralnet_20var_ERL20U60",
     ]
 
     # baseline_file_1 = "gplvm_er20_bayesdag"
     baseline_file_1 = None
-    model_1 = "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.00001"
-    model_2 = "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.00005"
-    model_3 = "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.0001"
-    model_4 = "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.0005"
-    model_5 = "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.001"
-    model_6 = "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.005"
-    model_7 = "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.01"
-    # model_6 = "20var_prob_ER10to60"
-    # model_7 = "gplvm_20var_NH16_NE4_ND12_DM256_DF512"
+
+    model_1 = "transformer_neuralnet_20var_ER20_NH8_NE4_ND4_DM512_DF1024"
+    model_2 = "transformer_neuralnet_20var_ER40_NH8_NE4_ND4_DM512_DF1024"
+    model_3 = "transformer_neuralnet_20var_ER60_NH8_NE4_ND4_DM512_DF1024"
+    model_4 = "transformer_neuralnet_20var_ERL20U60_NH8_NE4_ND4_DM512_DF1024"
+    model_5 = "probabilistic_neuralnet_20var_ER20_NH8_NE4_ND4_DM512_DF1024"
+    model_6 = "probabilistic_neuralnet_20var_ER40_NH8_NE4_ND4_DM512_DF1024"
+    model_7 = "probabilistic_neuralnet_20var_ER60_NH8_NE4_ND4_DM512_DF1024"
+    model_8 = "probabilistic_neuralnet_20var_ERL20U60_NH8_NE4_ND4_DM512_DF1024"
 
     model_key = {
-        # "gplvm_er20_bayesdag": "BayesDAG",
-        "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.00001": "1e-5",
-        "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.00005": "5e-5",
-        "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.0001": "1e-4",
-        "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.0005": "5e-4",
-        "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.001": "1e-3",
-        "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.005": "5e-3",
-        "gplvm_20var_NH8_NE4_ND4_DM512_DF1024_LR0.01": "1e-2",
-        # "20var_prob_ER10to60": "CausalNPProbabilisticER10to60",
-        # "gplvm_20var_NH16_NE4_ND12_DM256_DF512": "4EN_12DE",
-
+        model_1: "avici_ER20",
+        model_2: "avici_ER40",
+        model_3: "avici_ER60",
+        model_4: "avici_ERL20U60",
+        model_5: "prob_ER20",
+        model_6: "prob_ER40",
+        model_7: "prob_ER60",
+        model_8: "prob_ERL20U60",
     }
 
     baseline_files = [
@@ -179,7 +174,8 @@ if __name__ == "__main__":
         model_4,
         model_5,
         model_6,
-        model_7
+        model_7,
+        model_8,
     ]
 
     for data in data_files:

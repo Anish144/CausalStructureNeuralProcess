@@ -132,7 +132,7 @@ def npf_main(args):
     result_folder = work_dir / "experiments" / "causal_classification" / "results"
     result_folder.mkdir(parents=True, exist_ok=True)
     # Save the results
-    with open(work_dir / f"{args.run_name}.json", "w") as f:
+    with open(result_folder / f"{args.run_name}.json", "w") as f:
         json.dump(metric_dict, f)
     pass
 
