@@ -6,7 +6,7 @@ ND=4
 DM=512
 DF=1024
 NH=8
-DS=gplvm_20var
+DS=neuralnet_20var_ERL20U60
 
 # List of learning rates to iterate over
 learning_rates=(0.01 0.005 0.001 0.0005 0.0001 0.00005 0.00001)
