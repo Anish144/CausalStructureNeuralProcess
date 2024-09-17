@@ -65,7 +65,7 @@ def hpc_main(args):
 
 def hpc_classify_main(args):
     num_vars = 20
-    function_gen = "linear"
+    function_gen = "gplvm"
     usecase = args.folder_name
     # Rest of the code...
     num_samples = 1000

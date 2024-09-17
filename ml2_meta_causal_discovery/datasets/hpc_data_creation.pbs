@@ -1,6 +1,6 @@
 #PBS -l walltime=48:00:00
-#PBS -l select=1:ncpus=128:mem=64gb
-#PBS -J 1-50
+#PBS -l select=1:ncpus=16:mem=64gb:ngpus=1:gpu_type=RTX6000
+#PBS -J 1-25
 
 module load anaconda3/personal
 module load cuda/11.2.2
@@ -13,4 +13,6 @@ python3 /rds/general/user/ad6013/home/Research/CausalStructureNeuralProcess/ml2_
     --work_dir="/rds/general/user/ad6013/home/Research/CausalStructureNeuralProcess/ml2_meta_causal_discovery" \
     --batch_size=20000 \
     --data_start=$PBS_ARRAY_INDEX \
-    --data_end=$(($PBS_ARRAY_INDEX + 1))
+    --data_end=$(($PBS_ARRAY_INDEX + 1)) \
+    --exp_edges_lower=40 \
+    --exp_edges_upper=40
