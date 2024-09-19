@@ -1,0 +1,16 @@
+{
+    "test_data": {
+        "auc": 0.6402083333333334,
+        "cpdag-shd": 95.64,
+        "log_prob": -146.03176879882812,
+        "mmd-tp": -1,
+        "nll_train": 18.11021602014815,
+        "nll_val": 18.1138859411734,
+        "nnz": 87.566,
+        "num_dags": 500,
+        "orientation_fscore": 0.15107083891860568,
+        "shd": 97.956
+    },
+    "train_data": {},
+    "val_data": {}
+}
