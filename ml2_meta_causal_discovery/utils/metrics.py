@@ -109,7 +109,7 @@ def calc_SHD(target, pred, double_for_anticausal=True):
     return np.sum(diff)
 
 
-def expected_shd(target, pred):
+def expected_shd(target, pred, check_acyclic=False):
     """
     Expected SHD for a batch of predictions
 
@@ -127,12 +127,18 @@ def expected_shd(target, pred):
         # Loop over samples
         shd_sample = []
         for j in range(curr_pred.shape[0]):
-            shd = calc_SHD(curr_target, curr_pred[j], double_for_anticausal=True)
+            curr_sample_pred = curr_pred[j]
+            if check_acyclic:
+                if cyclicity(curr_sample_pred) != 0:
+                    continue
+                else:
+                    pass
+            shd = calc_SHD(curr_target, curr_sample_pred, double_for_anticausal=True)
             shd_sample.append(shd)
         shd_all[i] = np.mean(shd_sample)
     return shd_all
 
-def expected_f1_score(target, pred):
+def expected_f1_score(target, pred, check_acyclic=False):
     """
     Expected F1 score for a batch of predictions
 
@@ -150,9 +156,15 @@ def expected_f1_score(target, pred):
         # Loop over samples
         f1_sample = []
         for j in range(curr_pred.shape[0]):
+            curr_sample_pred = curr_pred[j]
+            if check_acyclic:
+                if cyclicity(curr_sample_pred) != 0:
+                    continue
+                else:
+                    pass
             f1 = f1_score(
                 curr_target.flatten(),
-                curr_pred[j].flatten(),
+                curr_sample_pred.flatten(),
                 average="binary",
                 zero_division=0,
             )

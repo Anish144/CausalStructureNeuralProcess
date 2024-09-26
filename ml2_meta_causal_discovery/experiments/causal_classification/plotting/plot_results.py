@@ -158,9 +158,9 @@ if __name__ == "__main__":
     work_dir = Path(__file__).absolute().parent.parent.parent.parent
 
     data_name_list = [
-        "neuralnet_20var_ER20",
-        "neuralnet_20var_ER40",
-        "neuralnet_20var_ER60",
+        "linear_20var_ER20",
+        "linear_20var_ER40",
+        "linear_20var_ER60",
         # "neuralnet_20var_ERL20U60",
     ]
 
@@ -193,7 +193,7 @@ if __name__ == "__main__":
     for data in data_name_list:
         model_1 = f"transformer_{data}_NH8_NE4_ND4_DM512_DF1024"
         model_2 = f"probabilistic_{data}_NH8_NE4_ND4_DM512_DF1024"
-        model_3 = f"probabilistic_neuralnet_20var_ERL20U60_NH8_NE4_ND4_DM512_DF1024"
+        model_3 = f"probabilistic_linear_20var_ERL20U60_NH8_NE4_ND4_DM512_DF1024"
 
         model_key = {
             model_1: "AVICI",

@@ -115,7 +115,7 @@ class CausalClassifierTrainer:
         else:
             pass
 
-    def test_single_epoch(self, test_loader, metric_dict, calc_metrics=False, num_samples=100):
+    def test_single_epoch(self, test_loader, metric_dict, calc_metrics=False, num_samples=100, check_acyclic=False):
         with th.no_grad():
             self.model.to("cuda")
             dtype = th.float32
@@ -141,8 +141,8 @@ class CausalClassifierTrainer:
                     )
                     auc = auc_graph_scores(targets, predictions)
                     log_prob = log_prob_graph_scores(targets, predictions.to(targets.device))
-                    e_shd = expected_shd(targets.cpu().detach().numpy(), predictions.cpu().detach().numpy())
-                    e_f1 = expected_f1_score(targets.cpu().detach().numpy(), predictions.cpu().detach().numpy())
+                    e_shd = expected_shd(targets.cpu().detach().numpy(), predictions.cpu().detach().numpy(), check_acyclic=check_acyclic)
+                    e_f1 = expected_f1_score(targets.cpu().detach().numpy(), predictions.cpu().detach().numpy(), check_acyclic=check_acyclic)
                     result = {
                         "e_shd": list(e_shd),
                         "e_f1": list(e_f1),

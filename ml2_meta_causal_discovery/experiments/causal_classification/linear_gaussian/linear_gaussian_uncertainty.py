@@ -24,6 +24,7 @@ from ml2_meta_causal_discovery.datasets.dataset_generators import \
     ClassifyDatasetGenerator
 from functools import partial
 
+
 MODELS = {
     "causal_qbeforel": CausalProbabilisticDecoder,
     "csiva": CsivaDecoder,
@@ -169,6 +170,7 @@ def main(
             metric_dict={},
             calc_metrics=True,
             num_samples=500,
+            check_acyclic=False if model == "causal_qbeforel" else True,
         )
 
         print(f"Results for {model}: {metric_dict}")

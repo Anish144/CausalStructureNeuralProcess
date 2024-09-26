@@ -480,7 +480,7 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
         # shape [batch_size, num_nodes]
         p_param = self.p_param(Q_rep).squeeze(-1)
         ovector = torch.arange(
-            self.num_nodes,
+            1, self.num_nodes + 1,
             device=p_param.device,
             dtype=p_param.dtype
         )

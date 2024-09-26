@@ -108,10 +108,13 @@ if __name__ == "__main__":
     num_samples = 500
 
     data_files = [
-        "neuralnet_20var_ER20",
-        "neuralnet_20var_ER40",
-        "neuralnet_20var_ER60",
-        "neuralnet_20var_ERL20U60",
+        # "neuralnet_20var_ER20",
+        # "neuralnet_20var_ER40",
+        # "neuralnet_20var_ER60",
+        # "neuralnet_20var_ERL20U60",
+        "linear_20var_ER20",
+        "linear_20var_ER40",
+        "linear_20var_ER60",
     ]
 
     for data in data_files:
