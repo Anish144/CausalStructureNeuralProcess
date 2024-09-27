@@ -14,6 +14,7 @@ from ml2_meta_causal_discovery.models.causaltransformercomponents import (
     CausalTransformerDecoderLayer,
     build_mlp,
 )
+from ml2_meta_causal_discovery.utils.metrics import cyclicity
 
 
 class AviciDecoder(CausalTNPEncoder):
@@ -63,13 +64,22 @@ class AviciDecoder(CausalTNPEncoder):
             device=device,
             dtype=dtype,
         )
+        self.regulariser_weight = torch.nn.Parameter(torch.tensor(0.0), requires_grad=False)
+        self.regulariser_lr = 1e-4 # hard coded from avici paper
+        self.cyclicity_value_avg = None
 
     def decode(self, representation):
         # shape [batch_size, num_nodes, d_model]
         decoder_rep = self.decoder(representation)
         return decoder_rep
 
-    def calculate_loss(self, logits, target):
+    def update_regulariser_weight(self, acyclic_loss):
+        """
+        Should update every 500 steps according to avici paper.
+        """
+        self.regulariser_weight.data = self.regulariser_weight.data + self.regulariser_lr * acyclic_loss
+
+    def calculate_loss(self, logits, target, update_regulariser=False):
         """
         Args:
         -----
@@ -81,13 +91,33 @@ class AviciDecoder(CausalTNPEncoder):
             loss: torch.Tensor, shape [batch_size]
             logits: torch.Tensor, shape [batch_size, num_nodes ** 2]
         """
+        probs = torch.sigmoid(logits)
+        # set diagonal to 0
+        probs = probs * (1 - torch.eye(probs.size(-1), device=probs.device))
+        current_value = cyclicity(probs).mean().item()  # Get scalar value
+
         logits = logits.contiguous().view(logits.size(0), -1)
         target = target.contiguous().view(target.size(0), -1)
         # Classification loss
         loss_func = torch.nn.BCEWithLogitsLoss(reduction="none")
         loss = loss_func(logits, target)
         loss = loss.mean(dim=1)
-        return loss
+
+        # Update EMA of cyclicity_value
+        alpha = 0.1  # Smoothing factor between 0 and 1
+        if self.cyclicity_value_avg is None:
+            self.cyclicity_value_avg = current_value
+        else:
+            self.cyclicity_value_avg = (
+                alpha * current_value + (1 - alpha) * self.cyclicity_value_avg
+            )
+
+        acyclic_loss = self.regulariser_weight * current_value
+
+        # Update dual weight with EMA
+        if update_regulariser:
+            self.update_regulariser_weight(self.cyclicity_value_avg)
+        return loss + acyclic_loss
 
     def forward(self, target_data, graph, is_training=True):
         # target_data: [batch_size, num_samples, num_nodes]
@@ -118,6 +148,8 @@ class AviciDecoder(CausalTNPEncoder):
         existence_dist = torch.distributions.Bernoulli(
             probs=torch.nn.Sigmoid()(adj_matrix)
         )
+        # Set diag to 0
+        existence_dist.probs = existence_dist.probs * (1 - torch.eye(adj_matrix.size(-1), device=adj_matrix.device))
         samples = existence_dist.sample(
             sample_shape=(num_samples,)
         )

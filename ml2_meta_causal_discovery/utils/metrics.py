@@ -18,14 +18,15 @@ def cyclicity(A):
     Returns:
         bool: True if the graph is cyclic, False otherwise
     """
-    n_vars = A.shape[0]
+    if isinstance(A, np.ndarray):
+        A = th.tensor(A, dtype=th.float32)
+    n_vars = A.shape[-1]
     # alpha = 1.0 / n_vars
 
     # M = tf.add(tf.eye(n_vars, dtype=default_float()), alpha * A)
 
     M_mult = th.linalg.matrix_exp(A)
-
-    h = th.trace(M_mult) - n_vars
+    h = th.einsum('...ii', M_mult) - n_vars
 
     return h
 
@@ -128,11 +129,6 @@ def expected_shd(target, pred, check_acyclic=False):
         shd_sample = []
         for j in range(curr_pred.shape[0]):
             curr_sample_pred = curr_pred[j]
-            if check_acyclic:
-                if cyclicity(curr_sample_pred) != 0:
-                    continue
-                else:
-                    pass
             shd = calc_SHD(curr_target, curr_sample_pred, double_for_anticausal=True)
             shd_sample.append(shd)
         shd_all[i] = np.mean(shd_sample)
@@ -157,11 +153,6 @@ def expected_f1_score(target, pred, check_acyclic=False):
         f1_sample = []
         for j in range(curr_pred.shape[0]):
             curr_sample_pred = curr_pred[j]
-            if check_acyclic:
-                if cyclicity(curr_sample_pred) != 0:
-                    continue
-                else:
-                    pass
             f1 = f1_score(
                 curr_target.flatten(),
                 curr_sample_pred.flatten(),

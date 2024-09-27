@@ -26,10 +26,10 @@ from functools import partial
 
 
 MODELS = {
+    "avici": AviciDecoder,
     "causal_qbeforel": CausalProbabilisticDecoder,
     "csiva": CsivaDecoder,
-    "avici": AviciDecoder,
-}
+ }
 
 # MODELS = {
     # "causal_qbeforel": partial(CausalProbabilisticDecoder, Q_before_L=True),
@@ -155,7 +155,7 @@ def main(
             test_dataset=test_dataset,
             model=inst_model,
             optimizer=optimiser_part_init(inst_model.parameters()),
-            epochs=1,
+            epochs=2,
             batch_size=32,
             num_workers=12,
             lr_warmup_ratio=0.1, # Should be around 10% of the total steps

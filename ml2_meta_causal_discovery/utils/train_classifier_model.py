@@ -104,14 +104,20 @@ class CausalClassifierTrainer:
             collate_fn=transformer_classifier_val_split(),
         )
 
-    def apply_learning_rate_warmup(self, epoch, step, lr_warmup_steps):
+    def apply_learning_rate_warmup(self, epoch, step, lr_warmup_steps, is_avici=False):
         """
         Warmup should be around 10% of the total steps.
+
+        If the model is an Avici model, then we need top warmup the
+        regularisation parameter as well.
         """
         if epoch == 0 and step < lr_warmup_steps:
             lr = step / lr_warmup_steps * self.learning_rate
             for param_group in self.optimizer.param_groups:
                 param_group["lr"] = lr
+            if is_avici:
+                # Hard code to 1e-4
+                self.model.regulariser_lr = step / lr_warmup_steps * 1e-4
         else:
             pass
 
@@ -212,6 +218,7 @@ class CausalClassifierTrainer:
         epoch,
         lr_warmup_steps,
     ):
+        is_avici = self.model.__class__.__name__ == "AviciDecoder"
         self.model.train()
         dtype = th.bfloat16 if self.bfloat16 else th.float32
         self.model.to(dtype)
@@ -220,7 +227,7 @@ class CausalClassifierTrainer:
         for i, data in enumerate(pbar):
             # Learning rate warmup
             self.apply_learning_rate_warmup(
-                epoch=epoch, step=i, lr_warmup_steps=lr_warmup_steps
+                epoch=epoch, step=i, lr_warmup_steps=lr_warmup_steps, is_avici=is_avici
             )
             # Get the inputs and targets
             inputs, targets = data
@@ -234,7 +241,13 @@ class CausalClassifierTrainer:
             self.optimizer.zero_grad()
             # Forward pass
             logits = self.model(inputs, graph=targets)
-            loss = self.model.calculate_loss(logits, targets)
+            if is_avici:
+                if i % 500 == 0:
+                   loss = self.model.calculate_loss(logits, targets, update_regulariser=True)
+                else:
+                    loss = self.model.calculate_loss(logits, targets)
+            else:
+                loss = self.model.calculate_loss(logits, targets)
             loss.mean().backward()
             # Gradient clipping
             th.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
