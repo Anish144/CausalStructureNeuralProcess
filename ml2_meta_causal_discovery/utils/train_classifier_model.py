@@ -242,7 +242,7 @@ class CausalClassifierTrainer:
             # Forward pass
             logits = self.model(inputs, graph=targets)
             if is_avici:
-                if i % 500 == 0:
+                if i % 250 == 0:
                    loss = self.model.calculate_loss(logits, targets, update_regulariser=True)
                 else:
                     loss = self.model.calculate_loss(logits, targets)

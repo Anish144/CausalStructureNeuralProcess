@@ -75,7 +75,7 @@ class AviciDecoder(CausalTNPEncoder):
 
     def update_regulariser_weight(self, acyclic_loss):
         """
-        Should update every 500 steps according to avici paper.
+        Should update every 250 steps.
         """
         self.regulariser_weight.data = self.regulariser_weight.data + self.regulariser_lr * acyclic_loss
 
