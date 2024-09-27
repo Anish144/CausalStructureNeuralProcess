@@ -14,7 +14,9 @@ from ml2_meta_causal_discovery.datasets.functions_generator import (
     GPLVMFunctionGenerator,
     LinearFunctionGenerator,
     NeuralNetFunctionGenerator,
+    GPLVMNeuralNetFunctionGenerator,
 )
+from tqdm import trange
 
 
 class ClassifyDatasetGenerator(IterableDataset):
@@ -57,18 +59,17 @@ class ClassifyDatasetGenerator(IterableDataset):
         function_generator: str,
         batch_size: int,
         num_samples: int,
-        graph_type: str,
+        graph_type: List[str],
         graph_degrees: List[int],
         kernel_sum: Optional[bool] = False,
         mean_function: str = "latent",
         device: str = "cpu",
     ):
-        valid_function_generators = ["gplvm", "gp", "linear", "neuralnet"]
+        valid_function_generators = ["gplvm", "gp", "linear", "neuralnet", "gplvm_neuralnet"]
         valid_graph_types = ["ER", "SF"]
         assert (
             function_generator in valid_function_generators
         ), "Function generator is not valid."
-        assert graph_type in valid_graph_types, "Graph type is not valid."
 
         self.num_variables = num_variables
         self.function_generator = function_generator
@@ -99,6 +100,12 @@ class ClassifyDatasetGenerator(IterableDataset):
             )
         elif self.function_generator == "neuralnet":
             self.data_generator = NeuralNetFunctionGenerator(
+                num_variables=self.num_variables,
+                num_samples=self.num_samples,
+                interventions=False,
+            )
+        elif self.function_generator == "gplvm_neuralnet":
+            self.data_generator = GPLVMNeuralNetFunctionGenerator(
                 num_variables=self.num_variables,
                 num_samples=self.num_samples,
                 interventions=False,
@@ -198,12 +205,14 @@ class ClassifyDatasetGenerator(IterableDataset):
             (self.batch_size, self.num_variables, self.num_variables)
         )
         # Loop over to batch; a different function (causal graph) for each batch
-        for b in range(self.batch_size):
+        for b in trange(self.batch_size):
             expected_node_degree = self.sample_uniform_expected_degree()
+            # Randomly sample a graph type
+            curr_graph_type = np.random.choice(self.graph_type)
             dag = generate_synthetic_dag(
                 d=self.num_variables,
                 s0=expected_node_degree,
-                graph_type=self.graph_type,
+                graph_type=curr_graph_type,
             )
 
             # Need to permute the graph so that the graph is randomised.

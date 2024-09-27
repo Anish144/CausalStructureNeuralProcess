@@ -25,6 +25,7 @@ from ml2_meta_causal_discovery.utils.gplvm_utils import (
     sample_normal_latent,
     sample_sum_kernels,
     sample_variance,
+    SumExpGammaKernels,
 )
 from ml2_meta_causal_discovery.utils.processing import (
     normalise_variable,
@@ -36,6 +37,7 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 from typing import Optional
 import torch as th
+import torch.nn as nn
 
 
 class GPLVMFunctions:
@@ -162,6 +164,83 @@ class NeuralNetFunction(th.nn.Module):
             return x.detach().cpu().numpy().squeeze(-1)
 
 
+class WiderNeuralNetFunction(th.nn.Module):
+
+    def __init__(self, num_parents: int, no_latent=False) -> None:
+        super(NeuralNetFunction, self).__init__()
+        self.num_parents = num_parents
+        self.no_latent = no_latent
+        self.device = th.device("cuda" if th.cuda.is_available() else "cpu")
+
+        # Define the network
+        self.linear_1 = th.nn.Linear(num_parents, 128)
+        self.act_1 = th.nn.LeakyReLU()
+        self.linear_2 = th.nn.Linear(128, 128)
+        self.act_2 = th.nn.LeakyReLU()
+        self.linear_3 = th.nn.Linear(128, 1)
+        self.to(self.device)
+
+    def init_weights(self, m):
+        for name, param in m.named_parameters():
+            if 'weight' in name:
+                nn.init.normal_(param, mean=0, std=1)
+            if 'bias' in name:
+                nn.init.constant_(param, 0)
+
+    def __call__(self, inputs: np.ndarray) -> np.ndarray:
+        """
+        Sample from an NN
+        """
+        assert inputs.shape[-1] == self.num_parents, "Incorrect input shape!"
+        with th.no_grad():
+            x = th.tensor(inputs, dtype=th.float32, device=self.device)
+            x = self.linear_1(x)
+            x = self.act_1(x)
+            x = self.linear_2(x)
+            x = self.act_2(x)
+            x = self.linear_3(x)
+            # sample noise from a gamma
+            noise = th.distributions.Gamma(2.5, 1.5).sample((inputs.shape[0], 1)).to(self.device)
+            x = x + noise * th.randn_like(x)
+            return x.detach().cpu().numpy().squeeze(-1)
+
+
+class GPLVMtorchFunctions(th.nn.Module):
+
+    def __init__(self, num_parents: int, no_latent=False) -> None:
+        super(GPLVMtorchFunctions, self).__init__()
+        self.num_parents = num_parents
+        self.no_latent = no_latent
+        self.device = th.device("cuda" if th.cuda.is_available() else "cpu")
+
+        # lengthscale_values = np.random.uniform(0.01, 5.0, size=(2, num_parents))
+        lengthscale_values = np.random.lognormal(0, 1, size=(3, num_parents))
+        lengthscale_values = np.clip(lengthscale_values, 0.01, 10.0)
+        gamma_values = np.random.uniform(0.00001, 1.99999, size=(3))
+        # Define the network
+        self.kernel = SumExpGammaKernels(
+            num_kernels=3,
+            gamma_vals=th.from_numpy(gamma_values).to(self.device),
+            lengthscale_vals=th.from_numpy(lengthscale_values).to(self.device),
+        )
+
+    def __call__(self, inputs: np.ndarray) -> np.ndarray:
+        """
+        Sample from an GPLVM.
+        """
+        assert inputs.shape[-1] == self.num_parents, "Incorrect input shape!"
+        with th.no_grad():
+            inputs = th.from_numpy(inputs).to(self.device).to(th.float32)
+            covariance = self.kernel(inputs, inputs)
+            identity = th.eye(inputs.shape[0], dtype=th.float32, device=self.device)
+            noise_value = th.distributions.Gamma(2.5, 1.5).sample((inputs.shape[0], 1)).to(self.device).to(th.float32)
+            covariance = covariance + identity * noise_value
+            mean = inputs[:, -1]
+            normal_dist = th.distributions.MultivariateNormal(mean, covariance)
+            output = normal_dist.sample()
+            return output.detach().cpu().numpy()
+
+
 class DataGenerator(ABC):
     """
     Base class for all causal data generators.
@@ -236,8 +315,7 @@ class DataGenerator(ABC):
             inputs = self._get_inputs(parents_of_i, data)
             full_inputs_obs = np.concatenate((inputs, latent), axis=1)
 
-            full_inputs = full_inputs_obs
-
+            full_inputs = (full_inputs_obs - full_inputs_obs.mean(axis=0, keepdims=True)) / full_inputs_obs.std(axis=0, keepdims=True)
             # Sometimes hyperparams give badly conditioned cov matrices,
             # This resamples until it works.
             finish = 0
@@ -485,7 +563,7 @@ class LinearFunctionGenerator(DataGenerator):
 
 class NeuralNetFunctionGenerator(DataGenerator):
     """
-    Generate data by passing a uniform [-1, 1] latent along with inputs
+    Generate data by passing a latent along with inputs
     into a random 2 layer neural network.
     """
 
@@ -508,5 +586,39 @@ class NeuralNetFunctionGenerator(DataGenerator):
                 no_latent=False,
                 num_parents=num_parents
             )
+            function_dict[i] = function
+        return function_dict
+
+
+class GPLVMNeuralNetFunctionGenerator(DataGenerator):
+    "Each variable has a neural net or a GPLVM generator."
+
+    def return_data(self, causal_graph: np.ndarray) -> np.ndarray:
+        data = self.generate_data(
+            causal_graph=causal_graph
+        )
+        return data
+
+    def generate_functions(
+        self,
+        causal_graph: np.ndarray,
+    ) -> dict:
+        function_dict = {}
+        for i in range(self.number_of_variables):
+            parents_of_i = causal_graph[:, i]
+            # Plus one for latent variable.
+            num_parents = int(np.sum(parents_of_i) + 1)
+            function_type = np.random.choice(["gp", "nn"])
+            if function_type == "nn":
+                function = NeuralNetFunction(
+                    no_latent=False,
+                    num_parents=num_parents,
+                )
+            else:
+                function = GPLVMtorchFunctions(
+                    no_latent=False,
+                    num_parents=num_parents,
+                )
+
             function_dict[i] = function
         return function_dict

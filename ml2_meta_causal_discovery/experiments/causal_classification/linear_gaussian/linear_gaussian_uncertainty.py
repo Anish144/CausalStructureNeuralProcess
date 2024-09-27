@@ -66,7 +66,7 @@ def sample_linear_gaussian_data(
         batch_size=num_datasets,
         num_samples=sample_size,
         graph_type="ER",
-        graph_degrees=[10, 20]
+        graph_degrees=[10, 20, 30]
     )
     data, causal_graphs = next(datagenerator.generate_next_dataset())[:]
     # Normalise the data along the 1st axis

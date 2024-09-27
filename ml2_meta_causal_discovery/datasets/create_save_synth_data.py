@@ -65,18 +65,18 @@ def hpc_main(args):
 
 def hpc_classify_main(args):
     num_vars = 20
-    function_gen = "gplvm"
+    function_gen = "gplvm_neuralnet"
     usecase = args.folder_name
     # Rest of the code...
     num_samples = 1000
-    graph_type = "ER"
+    graph_type = ["ER", "SF"]
     exp_edges_upper = args.exp_edges_upper
     exp_edges_lower = args.exp_edges_lower
 
     if exp_edges_upper == exp_edges_lower:
-        name = f"{function_gen}_{num_vars}var_ER{args.exp_edges_lower}"
+        name = f"{function_gen}_{num_vars}var_ERSF{args.exp_edges_lower}"
     else:
-        name = f"{function_gen}_{num_vars}var_ERL{args.exp_edges_lower}U{args.exp_edges_upper}"
+        name = f"{function_gen}_{num_vars}var_ERSFL{args.exp_edges_lower}U{args.exp_edges_upper}"
 
     dataset_generator = ClassifyDatasetGenerator(
         num_variables=num_vars,
