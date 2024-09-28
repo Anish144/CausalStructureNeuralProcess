@@ -458,7 +458,7 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
         """
         Args:
         -----
-            probs: torch.Tensor, shape [batch_size, num_samples, num_nodes, num_nodes]
+            probs: torch.Tensor, shape [num_samples, batch_size, num_nodes, num_nodes]
             target: torch.Tensor, shape [batch_size, num_nodes, num_nodes]
 
         Returns:
