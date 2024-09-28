@@ -16,7 +16,7 @@ RUN_NAME="${MT}_${DS}_NH${NH}_NE${NE}_ND${ND}_DM${DM}_DF${DF}"
 python3 /gpfs/home/ad6013/Research/CausalStructureNeuralProcess/ml2_meta_causal_discovery/experiments/causal_classification/train_causal_classify.py \
     --work_dir="/gpfs/home/ad6013/Research/CausalStructureNeuralProcess/ml2_meta_causal_discovery/" \
     --learning_rate=1e-4 \
-    --batch_size=32 \
+    --batch_size=8 \
     --max_epochs=2 \
     --run_name=$RUN_NAME \
     --data_file=$DS \
