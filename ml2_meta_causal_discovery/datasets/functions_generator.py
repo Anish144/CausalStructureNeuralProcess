@@ -200,7 +200,7 @@ class WiderNeuralNetFunction(th.nn.Module):
             x = self.act_2(x)
             x = self.linear_3(x)
             # sample noise from a gamma
-            noise = th.distributions.Gamma(2.5, 1.5).sample((inputs.shape[0], 1)).to(self.device)
+            noise = th.distributions.Gamma(2.5, 4).sample((inputs.shape[0], 1)).to(self.device)
             x = x + noise * th.randn_like(x)
             return x.detach().cpu().numpy().squeeze(-1)
 
@@ -213,13 +213,12 @@ class GPLVMtorchFunctions(th.nn.Module):
         self.no_latent = no_latent
         self.device = th.device("cuda" if th.cuda.is_available() else "cpu")
 
-        # lengthscale_values = np.random.uniform(0.01, 5.0, size=(2, num_parents))
-        lengthscale_values = np.random.lognormal(0, 1, size=(3, num_parents))
-        lengthscale_values = np.clip(lengthscale_values, 0.01, 10.0)
-        gamma_values = np.random.uniform(0.00001, 1.99999, size=(3))
+        lengthscale_values = np.random.lognormal(-1, 1, size=(3, num_parents))
+        lengthscale_values = np.clip(lengthscale_values, 0.1, 5)
+        gamma_values = np.random.uniform(0.1, 1, size=(3,))
         # Define the network
         self.kernel = SumExpGammaKernels(
-            num_kernels=3,
+            num_kernels=2,
             gamma_vals=th.from_numpy(gamma_values).to(self.device),
             lengthscale_vals=th.from_numpy(lengthscale_values).to(self.device),
         )
@@ -232,12 +231,12 @@ class GPLVMtorchFunctions(th.nn.Module):
         with th.no_grad():
             inputs = th.from_numpy(inputs).to(self.device).to(th.float32)
             covariance = self.kernel(inputs, inputs)
-            identity = th.eye(inputs.shape[0], dtype=th.float32, device=self.device)
-            noise_value = th.distributions.Gamma(2.5, 1.5).sample((inputs.shape[0], 1)).to(self.device).to(th.float32)
-            covariance = covariance + identity * noise_value
+            noise_value = th.distributions.Gamma(1, 10).sample((inputs.shape[0], 1)).to(self.device).to(th.float32)
+            covariance = covariance + 1e-4 * th.eye(inputs.shape[0], device=self.device)
             mean = inputs[:, -1]
+            # mean = th.zeros(inputs.shape[0], device=self.device)
             normal_dist = th.distributions.MultivariateNormal(mean, covariance)
-            output = normal_dist.sample()
+            output = normal_dist.sample() + noise_value.flatten() * th.randn_like(mean)
             return output.detach().cpu().numpy()
 
 
@@ -311,6 +310,7 @@ class DataGenerator(ABC):
             # Observational data
             # Sample latent
             latent = sample_normal_latent(self.num_samples)
+            # latent = np.random.uniform(-1, 1, (self.num_samples, 1))
             # Inputs will be an empty array if there are no parents.
             inputs = self._get_inputs(parents_of_i, data)
             full_inputs_obs = np.concatenate((inputs, latent), axis=1)
@@ -318,20 +318,20 @@ class DataGenerator(ABC):
             full_inputs = (full_inputs_obs - full_inputs_obs.mean(axis=0, keepdims=True)) / full_inputs_obs.std(axis=0, keepdims=True)
             # Sometimes hyperparams give badly conditioned cov matrices,
             # This resamples until it works.
-            finish = 0
-            while finish == 0:
-                try:
-                    variable = function_for_i(full_inputs)
-                    finish = 1
-                except Exception as e:
-                    print(e)
-                    traceback.print_exc()
-                    function_dict = self.generate_functions(causal_graph)
-                    function_for_i = function_dict[i]
+            # finish = 0
+            # while finish == 0:
+            #     try:
+            variable = function_for_i(full_inputs)
+                    # finish = 1
+                # except Exception as e:
+                #     print(e)
+                #     traceback.print_exc()
+                #     function_dict = self.generate_functions(causal_graph)
+                #     function_for_i = function_dict[i]
 
             # Sometimes the function can return nan values
             # This resamples until it works.
-            while np.isnan(variable).any():
+            while np.isnan(variable).any() or np.isinf(variable).any():
                 function_dict = self.generate_functions(causal_graph)
                 function_for_i = function_dict[i]
                 variable = function_for_i(full_inputs)
@@ -339,6 +339,9 @@ class DataGenerator(ABC):
             variable_obs = variable
 
             data[:, i] = variable_obs
+
+        assert not np.isnan(data).any(), "Data contains NaNs!"
+        assert not np.isinf(data).any(), "Data contains infs!"
         return data
 
     @abstractmethod
@@ -429,36 +432,10 @@ class GPLVMFunctionGenerator(DataGenerator):
             # Plus one for latent variable.
             num_parents = int(np.sum(parents_of_i) + 1)
 
-            # Set kernel
-            if not self.kernel_sum:
-                variance = sample_variance(1)
-                lengthscale = sample_lengthscale(
-                    num_parents,
-                    fixed_lengthscale=self.lengthscale_fixed,
-                    gamma_vals=self.lengthscale_gamma_vals,
-                )
-                kernel_init = sample_kernel()
-                kernel = kernel_init(
-                    variance=variance[0],
-                    lengthscales=lengthscale,
-                )
-
-                linear_variance = sample_variance(1)
-                linear_kernel = gpflow.kernels.Linear(variance=linear_variance)
-                kernel = gpflow.kernels.Sum([kernel, linear_kernel])
-            else:
-                kernel = sample_sum_kernels(
+            function = GPLVMtorchFunctions(
+                    no_latent=False,
                     num_parents=num_parents,
                 )
-
-            # Set likelihood noise
-            likelihood_variance = sample_likelihood_variance()
-
-            function = GPLVMFunctions(
-                mean=self.mean_function,
-                kernel=kernel,
-                likelihood_variance=likelihood_variance,
-            )
             function_dict[i] = function
         return function_dict
 

@@ -235,7 +235,7 @@ class ExponentialGammaKernel(nn.Module):
         self.gamma = gamma
         self.lengthscale = lengthscale
         assert self.gamma > 0, "The gamma parameter must be positive."
-        assert self.gamma <= 2, "The gamma parameter must be less than or equal to 2."
+        assert self.gamma <= 1, "The gamma parameter must be less than or equal to 1."
 
     def forward(self, x1, x2):
         """
@@ -257,8 +257,13 @@ class ExponentialGammaKernel(nn.Module):
         # The cdist function computes the distances efficiently
         distances = torch.cdist(x1 / self.lengthscale, x2 / self.lengthscale, p=2)  # Euclidean distance (p=2)
 
+        # Symmetrically clip the distances to prevent numerical issues
+        distances = torch.clamp(distances, min=1e-36)
+
+        distances = (distances + distances.T) / 2
+
         # Apply the Exponential Gamma Kernel function
-        K = torch.exp(-self.gamma * distances)
+        K = torch.exp(- (distances ** self.gamma))
 
         return K
 
