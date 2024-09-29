@@ -59,10 +59,10 @@ def load_model_results(work_dir: Path, model_files: list, data_name: str):
 def plot_results(results: dict, model_key: dict, data_name: str):
     # Assuming 'all_results' is your DataFrame containing the results
     # Set the aesthetic style of the plots
-    sns.set(style="whitegrid")
+    sns.set(style="whitegrid", context="paper", font_scale=1.5)
 
     # Set a color palette that is visually appealing and colorblind-friendly
-    palette = sns.color_palette("husl", n_colors=results['model'].nunique())
+    palette = sns.color_palette("colorblind", n_colors=results['Model'].nunique())
 
     # Set the font to Times New Roman
     plt.rcParams["font.family"] = "Times New Roman"
@@ -73,7 +73,7 @@ def plot_results(results: dict, model_key: dict, data_name: str):
     matplotlib.rcParams['mathtext.bf'] = 'Times New Roman:bold'
 
     # Variables to plot with their corresponding arrows
-    variables = [('e_shd', '\u2193'), ('e_f1', '\u2191'), ('auc', '\u2191'), ('log_prob', '\u2191')]
+    variables = [('Expected SHD', '\u2193'), ('Expected Edge F1', '\u2191'), ('AUC', '\u2191'), ('Negative Log Probability', '\u2191')]
 
     # Create a larger figure for multiple subplots
     fig, axs = plt.subplots(1, len(variables), figsize=(24, 6))  # Adjust the figure size to be appropriate for multiple plots
@@ -84,14 +84,14 @@ def plot_results(results: dict, model_key: dict, data_name: str):
         fig, ax = plt.subplots(figsize=(10, 6))  # Adjust the figure size for each plot
 
         # Boxplot for each variable
-        sns.boxplot(x='model', y=var, hue='model', data=results, palette=palette, linewidth=2.5,
+        sns.boxplot(x='Model', y=var, hue='Model', data=results, palette=palette, linewidth=2.5,
                     medianprops={'color': 'red', 'linewidth': 2.5}, ax=ax)  # Set median line color to red
-        ax.set_title(f'{var} {arrow} for 3 Variable', fontsize=22)
+        ax.set_title(f'{var} ({arrow})', fontsize=22)
         ax.set_xlabel('', fontsize=22)
         ax.set_ylabel(var, fontsize=22)
 
         # Adjust the x-axis labels
-        labels = results['model'].unique()
+        labels = results['Model'].unique()
         labels = [model_key[label] for label in labels]
         formatted_labels = [label if label not in ['CGP-CDE', 'DGP-CDE'] else f'$\\bf{{{f"{label}"}}}$' for label in labels]
         ax.set_xticks(np.arange(len(labels)) + 0.25)
@@ -101,6 +101,7 @@ def plot_results(results: dict, model_key: dict, data_name: str):
 
         # Remove the legend to avoid overlap
         ax.get_legend().remove()
+        ax.grid(True, which='major', axis='y', linestyle='--', linewidth=0.7, color='gray', alpha=0.7)
 
         # Save each plot as a high-resolution image
         output_path = Path(__file__).absolute().parent / f'Baseline_{data_name}_{var}_Boxplot.png'
@@ -138,11 +139,11 @@ def main(
         for i in range(len(metrics['e_shd'])):
             all_results.append(
                 {
-                    'model': key,
-                    'e_shd': metrics['e_shd'][i],
-                    'e_f1': metrics['e_f1'][i],
-                    'auc': metrics['auc'][i],
-                    'log_prob': metrics['log_prob'][i],
+                    'Model': key,
+                    'Expected SHD': metrics['e_shd'][i],
+                    'Expected Edge F1': metrics['e_f1'][i],
+                    'AUC': metrics['auc'][i],
+                    'Negative Log Probability': metrics['log_prob'][i],
                 }
             )
     df = pd.DataFrame(all_results)
@@ -158,9 +159,12 @@ if __name__ == "__main__":
     work_dir = Path(__file__).absolute().parent.parent.parent.parent
 
     data_name_list = [
-        "linear_20var_ER20",
-        "linear_20var_ER40",
-        "linear_20var_ER60",
+        "neuralnet_20var_ER20",
+        "neuralnet_20var_ER40",
+        "neuralnet_20var_ER60",
+        # "linear_20var_ER20",
+        # "linear_20var_ER40",
+        # "linear_20var_ER60",
         # "neuralnet_20var_ERL20U60",
     ]
 
@@ -191,14 +195,15 @@ if __name__ == "__main__":
 
 
     for data in data_name_list:
-        model_1 = f"transformer_{data}_NH8_NE4_ND4_DM512_DF1024"
-        model_2 = f"probabilistic_{data}_NH8_NE4_ND4_DM512_DF1024"
-        model_3 = f"probabilistic_linear_20var_ERL20U60_NH8_NE4_ND4_DM512_DF1024"
+        model_1 = f"transformer_{data}_NH8_NE4_ND4_DM512_DF1024_BS32"
+        model_2 = f"autoregressive_{data}_NH8_NE4_ND4_DM256_DF512_BS8"
+        model_3 = f"probabilistic_{data}_NH8_NE4_ND4_DM512_DF1024"
 
         model_key = {
             model_1: "AVICI",
-            model_2: "BCNP",
-            model_3: "BCNP-ERL20U60",
+            model_2: "CSIvA",
+            model_3: "BCNP",
+            # model_3: "BCNP-ERL20U60",
             baseline_model_1: "BayesDAG",
             baseline_model_2: "DiBS",
             # model_3: "avici_ER60",
