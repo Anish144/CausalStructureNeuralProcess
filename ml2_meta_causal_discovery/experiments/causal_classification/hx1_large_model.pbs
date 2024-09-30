@@ -17,7 +17,7 @@ python3 /gpfs/home/ad6013/Research/CausalStructureNeuralProcess/ml2_meta_causal_
     --work_dir="/gpfs/home/ad6013/Research/CausalStructureNeuralProcess/ml2_meta_causal_discovery/" \
     --learning_rate=1e-4 \
     --batch_size=$BS \
-    --max_epochs=2 \
+    --max_epochs=$ER \
     --run_name=$RUN_NAME \
     --data_file=$DS \
     --num_workers=12 \

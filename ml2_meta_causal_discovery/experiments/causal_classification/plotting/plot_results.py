@@ -202,8 +202,8 @@ if __name__ == "__main__":
         # "neuralnet_20var_ERL20U60",
     # ]
 
-    baseline_model_1 = "bayesdag"
-    baseline_model_2 = "dibs"
+    baseline_model_2 = "bayesdag"
+    baseline_model_1 = "dibs"
     # baseline_file_1 = None
 
     # model_2 = "transformer_neuralnet_20var_ER40_NH8_NE4_ND4_DM512_DF1024"
@@ -224,14 +224,15 @@ if __name__ == "__main__":
         model_1 = f"transformer_{data}_NH8_NE4_ND4_DM512_DF1024_BS32"
         model_2 = f"autoregressive_{data}_NH8_NE4_ND4_DM256_DF512_BS4"
         model_3 = f"probabilistic_{data}_NH8_NE4_ND4_DM512_DF1024"
+        model_4 = f"probabilistic_linear_20var_ERL20U60_NH8_NE4_ND4_DM512_DF1024"
 
         model_key = {
+            baseline_model_1: "DiBS",
+            baseline_model_2: "BayesDAG",
             model_1: "AVICI",
             model_2: "CSIvA",
             model_3: "BCNP",
-            # model_3: "BCNP-ERL20U60",
-            baseline_model_1: "BayesDAG",
-            baseline_model_2: "DiBS",
+            model_4: "BCNP (all graph densities)",
             # model_3: "avici_ER60",
             # model_4: "avici_ERL20U60",
             # model_5: "prob_ER20",
@@ -243,7 +244,7 @@ if __name__ == "__main__":
             model_1,
             model_2,
             model_3,
-            # model_4,
+            model_4,
             # model_5,
             # model_6,
             # model_7,

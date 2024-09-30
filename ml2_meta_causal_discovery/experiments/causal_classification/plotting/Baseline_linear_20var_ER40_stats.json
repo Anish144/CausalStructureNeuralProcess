@@ -11,14 +11,19 @@
             "variance_of_mean": 0.09418878559999992
         },
         "DiBS": {
-            "mean": 75.3675,
-            "variance": 90.71039062500002,
-            "variance_of_mean": 3.6284156250000006
+            "mean": 72.4325,
+            "variance": 107.78852783203122,
+            "variance_of_mean": 4.3115411132812484
         },
         "BCNP": {
             "mean": 49.68103988647461,
             "variance": 7.968754547403319,
             "variance_of_mean": 0.31875018189613274
+        },
+        "BCNP (all graph densities)": {
+            "mean": 51.174719696044924,
+            "variance": 26.979447092760903,
+            "variance_of_mean": 1.0791778837104362
         },
         "AVICI": {
             "mean": 56.216240234375,
@@ -38,14 +43,19 @@
             "variance_of_mean": 1.7986963469996175e-05
         },
         "DiBS": {
-            "mean": 0.11069756227699454,
-            "variance": 0.0008297215847735723,
-            "variance_of_mean": 3.318886339094289e-05
+            "mean": 0.11029016476792855,
+            "variance": 0.0006408890162471848,
+            "variance_of_mean": 2.563556064988739e-05
         },
         "BCNP": {
             "mean": 0.3657371990343919,
             "variance": 0.001430522960879091,
             "variance_of_mean": 5.722091843516364e-05
+        },
+        "BCNP (all graph densities)": {
+            "mean": 0.35818444972861274,
+            "variance": 0.002349099845366969,
+            "variance_of_mean": 9.396399381467877e-05
         },
         "AVICI": {
             "mean": 0.2817251779724652,
@@ -65,14 +75,19 @@
             "variance_of_mean": 0.0001085548361947015
         },
         "DiBS": {
-            "mean": 0.5169527777777777,
-            "variance": 0.007080493393132718,
-            "variance_of_mean": 0.0002832197357253087
+            "mean": 0.5294291666666667,
+            "variance": 0.007914391645769037,
+            "variance_of_mean": 0.0003165756658307615
         },
         "BCNP": {
             "mean": 0.8871625000000001,
             "variance": 0.00059915078446502,
             "variance_of_mean": 2.39660313786008e-05
+        },
+        "BCNP (all graph densities)": {
+            "mean": 0.882625,
+            "variance": 0.0009340422453703706,
+            "variance_of_mean": 3.7361689814814824e-05
         },
         "AVICI": {
             "mean": 0.8595722222222222,
@@ -92,14 +107,19 @@
             "variance_of_mean": 1601.0248008164208
         },
         "DiBS": {
-            "mean": -165.63600158691406,
-            "variance": 415.0661180161598,
-            "variance_of_mean": 16.602644720646392
+            "mean": -160.70900390625,
+            "variance": 425.43687856198363,
+            "variance_of_mean": 17.017475142479345
         },
         "BCNP": {
             "mean": -89.37738403320313,
             "variance": 143.0948192257207,
             "variance_of_mean": 5.723792769028828
+        },
+        "BCNP (all graph densities)": {
+            "mean": -90.63133422851563,
+            "variance": 139.3661515836055,
+            "variance_of_mean": 5.57464606334422
         },
         "AVICI": {
             "mean": -94.1154653930664,
