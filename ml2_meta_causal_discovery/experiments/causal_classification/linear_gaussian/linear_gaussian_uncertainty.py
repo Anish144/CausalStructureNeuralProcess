@@ -59,14 +59,14 @@ def sample_linear_gaussian_data(
     sample_size: int,
     num_datasets: int,
 ):
-    num_nodes = 10
+    num_nodes = 2
     datagenerator = ClassifyDatasetGenerator(
         num_variables=num_nodes,
         function_generator="linear",
         batch_size=num_datasets,
         num_samples=sample_size,
-        graph_type="ER",
-        graph_degrees=[10, 20, 30]
+        graph_type=["ER"],
+        graph_degrees=[1]
     )
     data, causal_graphs = next(datagenerator.generate_next_dataset())[:]
     # Normalise the data along the 1st axis
@@ -123,7 +123,7 @@ def main(
         num_layers_decoder=4,
         device="cuda" if th.cuda.is_available() else "cpu",
         dtype=th.bfloat16,
-        num_nodes=10,
+        num_nodes=2,
         n_perm_samples=100,
         sinkhorn_iter=1000,
         use_positional_encoding=False,
@@ -133,7 +133,7 @@ def main(
     optimiser_part_init = partial(
         optimiser,
         lr=1e-4,
-        weight_decay=1e-10,
+        weight_decay=0,
     )
 
     all_results = {}
@@ -156,7 +156,7 @@ def main(
             model=inst_model,
             optimizer=optimiser_part_init(inst_model.parameters()),
             epochs=2,
-            batch_size=32,
+            batch_size=64,
             num_workers=12,
             lr_warmup_ratio=0.1, # Should be around 10% of the total steps
             bfloat16=True,
@@ -179,7 +179,7 @@ def main(
         del trainer
 
     # Save the results
-    with open(work_dir / "experiments" / "causal_classification" / "linear_gaussian" / "results_withqlbefore.json", "w") as f:
+    with open(work_dir / "experiments" / "causal_classification" / "linear_gaussian" / "results_2var_withqlbefore.json", "w") as f:
         json.dump(all_results, f)
 
     # Plot

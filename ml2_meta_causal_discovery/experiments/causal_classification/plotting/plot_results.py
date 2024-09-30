@@ -33,12 +33,16 @@ def load_baseline_results(work_dir: Path, baseline_file: list, data_name: str):
                     results = json.load(f)
 
             if baseline == "bayesdag":
-                baseline_full_results["log_prob"].append(results['test_data']["log_prob"])
+                baseline_full_results['log_prob'].append(results["test_data"][f"log_prob"])
                 baseline_full_results["auc"].append(results['test_data']["auc"])
                 baseline_full_results["e_f1"].append(results['test_data']["orientation_fscore"])
                 baseline_full_results["e_shd"].append(results['test_data']["shd"])
             elif baseline == "dibs":
-                baseline_full_results["log_prob"].append(results["log_prob"])
+                max_log_prob = - np.inf
+                for add_eps in ["1e_8", "1e_7", "1e_6", "1e_5", "1e_4", "1e_3", "1e_2"]:
+                    if results[f"log_prob_{add_eps}"] > max_log_prob:
+                        max_log_prob = results[f"log_prob_{add_eps}"]
+                baseline_full_results["log_prob"].append(max_log_prob)
                 baseline_full_results["e_f1"].append(results["F1"])
                 baseline_full_results["e_shd"].append(results["SHD"])
                 baseline_full_results["auc"].append(results["AUC"])
@@ -78,7 +82,8 @@ def plot_results(results: dict, model_key: dict, data_name: str):
     # Create a larger figure for multiple subplots
     fig, axs = plt.subplots(1, len(variables), figsize=(24, 6))  # Adjust the figure size to be appropriate for multiple plots
     fig.subplots_adjust(wspace=0.4)  # Add space between subplots
-
+    # Create a dictionary to store mean and variance data
+    stats_data = {}
     for var, arrow in variables:
         # Create a separate figure for each variable
         fig, ax = plt.subplots(figsize=(10, 6))  # Adjust the figure size for each plot
@@ -109,6 +114,27 @@ def plot_results(results: dict, model_key: dict, data_name: str):
 
         # Show the plot
         plt.show()
+
+        # Calculate mean and variance for the current variable grouped by Model
+        means = results.groupby('Model')[var].mean()
+        variances = results.groupby('Model')[var].var()
+        counts = results.groupby('Model')[var].count()
+
+        # Store the mean and variance of mean for each model
+        stats_data[var] = {
+            model_key[model]: {
+                'mean': means[model],
+                'variance': variances[model],
+                'variance_of_mean': variances[model] / counts[model]
+            } for model in means.index
+        }
+
+    # Save the stats data to a JSON file
+    json_output_path = Path(__file__).absolute().parent / f'Baseline_{data_name}_stats.json'
+    with open(json_output_path, 'w') as json_file:
+        json.dump(stats_data, json_file, indent=4)
+
+    print(f"Statistics saved to {json_output_path}")
 
 
 def main(
@@ -159,12 +185,12 @@ if __name__ == "__main__":
     work_dir = Path(__file__).absolute().parent.parent.parent.parent
 
     data_name_list = [
-        "neuralnet_20var_ER20",
-        "neuralnet_20var_ER40",
-        "neuralnet_20var_ER60",
-        # "linear_20var_ER20",
-        # "linear_20var_ER40",
-        # "linear_20var_ER60",
+        # "neuralnet_20var_ER20",
+        # "neuralnet_20var_ER40",
+        # "neuralnet_20var_ER60",
+        "linear_20var_ER20",
+        "linear_20var_ER40",
+        "linear_20var_ER60",
         # "neuralnet_20var_ERL20U60",
     ]
 
@@ -196,7 +222,7 @@ if __name__ == "__main__":
 
     for data in data_name_list:
         model_1 = f"transformer_{data}_NH8_NE4_ND4_DM512_DF1024_BS32"
-        model_2 = f"autoregressive_{data}_NH8_NE4_ND4_DM256_DF512_BS8"
+        model_2 = f"autoregressive_{data}_NH8_NE4_ND4_DM256_DF512_BS4"
         model_3 = f"probabilistic_{data}_NH8_NE4_ND4_DM512_DF1024"
 
         model_key = {

@@ -133,6 +133,7 @@ class CausalClassifierTrainer:
                 inputs, targets = data
                 targets = targets.to("cuda", dtype=dtype)
                 inputs = inputs.to("cuda", dtype=dtype)
+                inputs = (inputs - inputs.mean(dim=1, keepdim=True)) / inputs.std(dim=1, keepdim=True)
                 # Forward pass
                 adj_logit = self.model(inputs, graph=targets, is_training=False)
 
@@ -186,6 +187,7 @@ class CausalClassifierTrainer:
             inputs, targets = data
             targets = targets.to("cuda", dtype=dtype)
             inputs = inputs.to("cuda", dtype=dtype)
+            inputs = (inputs - inputs.mean(dim=1, keepdim=True)) / inputs.std(dim=1, keepdim=True)
             # Forward pass
             adj_logit = self.model(inputs, graph=targets, is_training=False)
 

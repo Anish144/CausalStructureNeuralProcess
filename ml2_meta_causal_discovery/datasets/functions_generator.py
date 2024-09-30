@@ -118,18 +118,17 @@ class LinearFunctions:
         """
         Samples from a linear function.
         """
-        if self.no_latent:
-            # Ignore the latent variable
-            inputs = inputs[:, :-1]
-
         input_num = inputs.shape[-1]
-
         if input_num == 1:
             return np.random.normal(loc=0, scale=1.0, size=(inputs.shape[0]))
         else:
+            if self.no_latent:
+                # Ignore the latent variable
+                inputs = inputs[:, :-1]
+                input_num = inputs.shape[-1]
             weights = np.random.normal(loc=0, scale=10.0, size=(input_num))
-            noise_hyper = np.random.gamma(shape=1.5, scale=2.5, size=(inputs.shape[0]))
-            noise = np.random.normal(loc=0, scale=noise_hyper)
+            noise_hyper = np.random.gamma(shape=2.5, scale=2.5, size=(1))
+            noise = np.random.normal(loc=0, scale=noise_hyper, size=(inputs.shape[0]))
             return inputs @ weights + noise
 
 
