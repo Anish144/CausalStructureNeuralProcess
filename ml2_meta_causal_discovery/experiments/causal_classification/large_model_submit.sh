@@ -31,8 +31,8 @@ param_list=(
     # "4,4,256,512,8,linear_20var_ER40,probabilistic,32", # RUN
     # "4,4,256,512,8,linear_20var_ER60,probabilistic,32", # RUN
     # "4,4,256,512,8,linear_20var_ER60,probabilistic,32", # RUN
-    "4,4,512,1024,16,gplvm_neuralnet_20var_ERSFL20U60,probabilistic,64,5", # RUN
-    "4,4,512,1024,16,gplvm_neuralnet_20var_ERSFL20U60,transformer,64,5", # RUN
+    "4,4,512,2048,16,gplvm_neuralnet_20var_ERSFL20U60,probabilistic,64,5", # RUN
+    "4,4,512,2048,16,gplvm_neuralnet_20var_ERSFL20U60,transformer,64,5", # RUN
     "4,4,256,512,8,gplvm_neuralnet_20var_ERSFL20U60,autoregressive,8,5", # RUN
 )
 # Iterate over each parameter set
