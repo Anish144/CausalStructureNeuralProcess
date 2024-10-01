@@ -11,7 +11,7 @@ module load cuDNN/8.6.0.163-CUDA-11.8.0
 export XLA_FLAGS=--xla_gpu_cuda_data_dir=/gpfs/easybuild/prod/software/CUDA/11.8.0/
 
 # Construct the run_name using the desired variables
-RUN_NAME="Avergaing_${MT}_${DS}_NH${NH}_NE${NE}_ND${ND}_DM${DM}_DF${DF}_BS${BS}_SS${SS}"
+RUN_NAME="AVERAGING_${MT}_${DS}_NH${NH}_NE${NE}_ND${ND}_DM${DM}_DF${DF}_BS${BS}_SS${SS}"
 
 python3 /gpfs/home/ad6013/Research/CausalStructureNeuralProcess/ml2_meta_causal_discovery/experiments/causal_classification/train_causal_classify.py \
     --work_dir="/gpfs/home/ad6013/Research/CausalStructureNeuralProcess/ml2_meta_causal_discovery/" \

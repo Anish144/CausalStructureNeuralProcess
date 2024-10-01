@@ -47,7 +47,7 @@ param_list=(
 #     "4,4,512,2048,16,gplvm_neuralnet_20var_ERSFL20U60,probabilistic,32,2,500", # RUN
 #     "4,4,512,2048,16,gplvm_neuralnet_20var_ERSFL20U60,transformer,32,2,500", # RUN
 #     "4,4,256,512,8,gplvm_neuralnet_20var_ERSFL20U60,autoregressive,8,5,500", # RUN
-# )
+)
 
 # Iterate over each parameter set
 for i in "${param_list[@]}"
