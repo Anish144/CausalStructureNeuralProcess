@@ -59,7 +59,7 @@ python3 train_causal_classify.py \
     --batch_size=32 \
     --max_epochs=2 \
     --run_name="test_large_model_float32" \
-    --data_file="gplvm_20var" \
+    --data_file="gplvm_neuralnet_20var_ERSFL20U60" \
     --num_workers=12 \
     --num_layers_encoder=4 \
     --num_layers_decoder=4 \

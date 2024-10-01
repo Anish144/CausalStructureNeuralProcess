@@ -114,7 +114,7 @@ def transformer_classifier_val_split():
 
 class MultipleFileDataset(th.utils.data.Dataset):
     def __init__(
-        self, file_list: list
+        self, file_list: list, sample_size: Optional[int]=None,
     ):
         super().__init__()
         self.all_data = []
@@ -125,10 +125,19 @@ class MultipleFileDataset(th.utils.data.Dataset):
             self.all_graphs.append(f["label"])
         # Assume all datasets have the same size
         self.size_each_dataset = self.all_data[0].shape[0]
+        # Data to subsample
+        self.sample_size = sample_size
+        if self.sample_size is not None:
+            assert self.sample_size <= self.all_data[0].shape[1]
 
     def load_data(self, data_idx, file_counter):
         target_data = self.all_data[file_counter][data_idx]
         graph = self.all_graphs[file_counter][data_idx]
+        if self.sample_size is not None:
+            indices = np.random.choice(
+                target_data.shape[0], self.sample_size, replace=False
+            )
+            target_data = target_data[indices]
         # Normalise the dataset
         target_data = (
             target_data - target_data.mean(axis=0)[None, :]

@@ -1,0 +1,70 @@
+{
+    "Expected SHD": {
+        "BayesDAG": {
+            "mean": 99.0904,
+            "variance": 8.156349155555533,
+            "variance_of_mean": 0.8156349155555533
+        },
+        "DiBS": {
+            "mean": 59.834375,
+            "variance": 14.962250434027785,
+            "variance_of_mean": 1.4962250434027786
+        },
+        "BCNP (All Data)": {
+            "mean": 45.83690071105957,
+            "variance": 39.39513654798712,
+            "variance_of_mean": 3.939513654798712
+        }
+    },
+    "Expected Edge F1": {
+        "BayesDAG": {
+            "mean": 0.09778421081053822,
+            "variance": 0.0007105375194336524,
+            "variance_of_mean": 7.105375194336524e-05
+        },
+        "DiBS": {
+            "mean": 0.15350256584702499,
+            "variance": 0.0008700112846752329,
+            "variance_of_mean": 8.700112846752328e-05
+        },
+        "BCNP (All Data)": {
+            "mean": 0.11621196799509503,
+            "variance": 0.0009682742817871404,
+            "variance_of_mean": 9.682742817871404e-05
+        }
+    },
+    "AUC": {
+        "BayesDAG": {
+            "mean": 0.5233207902322669,
+            "variance": 0.017552050506577755,
+            "variance_of_mean": 0.0017552050506577754
+        },
+        "DiBS": {
+            "mean": 0.8090089799438633,
+            "variance": 0.003406787938416063,
+            "variance_of_mean": 0.0003406787938416063
+        },
+        "BCNP (All Data)": {
+            "mean": 0.7412932244890055,
+            "variance": 0.0038825434598184247,
+            "variance_of_mean": 0.00038825434598184245
+        }
+    },
+    "Negative Log Probability": {
+        "BayesDAG": {
+            "mean": -195.5328857421875,
+            "variance": 2816.490281613378,
+            "variance_of_mean": 281.6490281613378
+        },
+        "DiBS": {
+            "mean": -83.30649261474609,
+            "variance": 28.072947076614938,
+            "variance_of_mean": 2.8072947076614936
+        },
+        "BCNP (All Data)": {
+            "mean": -82.69695205688477,
+            "variance": 68.04450382642099,
+            "variance_of_mean": 6.8044503826420994
+        }
+    }
+}

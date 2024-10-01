@@ -185,13 +185,14 @@ if __name__ == "__main__":
     work_dir = Path(__file__).absolute().parent.parent.parent.parent
 
     data_name_list = [
-        # "neuralnet_20var_ER20",
-        # "neuralnet_20var_ER40",
-        # "neuralnet_20var_ER60",
-        "linear_20var_ER20",
-        "linear_20var_ER40",
-        "linear_20var_ER60",
+        # "gplvm_20var_ER20",
+        # "gplvm_20var_ER40",
+        # "gplvm_20var_ER60",
+        # "linear_20var_ER20",
+        # "linear_20var_ER40",
+        # "linear_20var_ER60",
         # "neuralnet_20var_ERL20U60",
+        "syntren"
     ]
 
     # Need this to load the results
@@ -219,20 +220,21 @@ if __name__ == "__main__":
         baseline_model_2,
     ]
 
-
     for data in data_name_list:
-        model_1 = f"transformer_{data}_NH8_NE4_ND4_DM512_DF1024_BS32"
-        model_2 = f"autoregressive_{data}_NH8_NE4_ND4_DM256_DF512_BS4"
-        model_3 = f"probabilistic_{data}_NH8_NE4_ND4_DM512_DF1024"
-        model_4 = f"probabilistic_linear_20var_ERL20U60_NH8_NE4_ND4_DM512_DF1024"
+        # model_1 = f"transformer_{data}_NH8_NE4_ND4_DM512_DF1024_BS32"
+        # model_2 = f"autoregressive_{data}_NH8_NE4_ND4_DM256_DF512_BS8"
+        # model_3 = f"probabilistic_{data}_NH8_NE4_ND4_DM512_DF1024_BS32"
+        # model_4 = f"probabilistic_gplvm_20var_ERL20U60_NH8_NE4_ND4_DM512_DF1024_BS32"
+        model_5 = "probabilistic_gplvm_neuralnet_20var_ERSFL20U60_NH8_NE4_ND4_DM512_DF1024"
 
         model_key = {
             baseline_model_1: "DiBS",
             baseline_model_2: "BayesDAG",
-            model_1: "AVICI",
-            model_2: "CSIvA",
-            model_3: "BCNP",
-            model_4: "BCNP (all graph densities)",
+            # model_1: "AVICI",
+            # model_2: "CSIvA",
+            # model_3: "BCNP",
+            # model_4: "BCNP (ER20-60)",
+            model_5: "BCNP (All Data)",
             # model_3: "avici_ER60",
             # model_4: "avici_ERL20U60",
             # model_5: "prob_ER20",
@@ -241,11 +243,11 @@ if __name__ == "__main__":
             # model_8: "prob_ERL20U60",
         }
         model_files = [
-            model_1,
-            model_2,
-            model_3,
-            model_4,
-            # model_5,
+            # model_1,
+            # model_2,
+            # model_3,
+            # model_4,
+            model_5,
             # model_6,
             # model_7,
             # model_8,

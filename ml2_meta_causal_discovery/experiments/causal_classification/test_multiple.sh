@@ -1,7 +1,7 @@
 python3 test_causal_classify.py \
     --work_dir="/vol/bitbucket/ad6013/Research/CausalStructureNeuralProcess/ml2_meta_causal_discovery" \
-    --decoder="transformer" \
-    --model_list="transformer_neuralnet_20var_ER20_NH8_NE4_ND4_DM512_DF1024_BS32,transformer_neuralnet_20var_ER40_NH8_NE4_ND4_DM512_DF1024_BS32,transformer_neuralnet_20var_ER60_NH8_NE4_ND4_DM512_DF1024_BS32" \
+    --decoder="probabilistic" \
+    --model_list="probabilistic_gplvm_neuralnet_20var_ERSFL20U60_NH8_NE4_ND4_DM512_DF1024" \
     --num_nodes=20 \
 
 

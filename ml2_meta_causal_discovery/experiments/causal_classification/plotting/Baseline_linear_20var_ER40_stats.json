@@ -6,9 +6,9 @@
             "variance_of_mean": 0.0011687899114098917
         },
         "BayesDAG": {
-            "mean": 43.04584,
-            "variance": 2.354719639999998,
-            "variance_of_mean": 0.09418878559999992
+            "mean": 44.06896,
+            "variance": 6.9135167066666625,
+            "variance_of_mean": 0.2765406682666665
         },
         "DiBS": {
             "mean": 72.4325,
@@ -20,7 +20,7 @@
             "variance": 7.968754547403319,
             "variance_of_mean": 0.31875018189613274
         },
-        "BCNP (all graph densities)": {
+        "BCNP (ER20-60)": {
             "mean": 51.174719696044924,
             "variance": 26.979447092760903,
             "variance_of_mean": 1.0791778837104362
@@ -38,9 +38,9 @@
             "variance_of_mean": 1.7810540877929145e-07
         },
         "BayesDAG": {
-            "mean": 0.026504935494371704,
-            "variance": 0.00044967408674990436,
-            "variance_of_mean": 1.7986963469996175e-05
+            "mean": 0.03034733171406409,
+            "variance": 0.0007031732522706983,
+            "variance_of_mean": 2.8126930090827935e-05
         },
         "DiBS": {
             "mean": 0.11029016476792855,
@@ -52,7 +52,7 @@
             "variance": 0.001430522960879091,
             "variance_of_mean": 5.722091843516364e-05
         },
-        "BCNP (all graph densities)": {
+        "BCNP (ER20-60)": {
             "mean": 0.35818444972861274,
             "variance": 0.002349099845366969,
             "variance_of_mean": 9.396399381467877e-05
@@ -70,9 +70,9 @@
             "variance_of_mean": 8.19671799447016e-05
         },
         "BayesDAG": {
-            "mean": 0.5138263888888889,
-            "variance": 0.0027138709048675374,
-            "variance_of_mean": 0.0001085548361947015
+            "mean": 0.5104361111111111,
+            "variance": 0.002036098560474536,
+            "variance_of_mean": 8.144394241898145e-05
         },
         "DiBS": {
             "mean": 0.5294291666666667,
@@ -84,7 +84,7 @@
             "variance": 0.00059915078446502,
             "variance_of_mean": 2.39660313786008e-05
         },
-        "BCNP (all graph densities)": {
+        "BCNP (ER20-60)": {
             "mean": 0.882625,
             "variance": 0.0009340422453703706,
             "variance_of_mean": 3.7361689814814824e-05
@@ -102,9 +102,9 @@
             "variance_of_mean": 0.038057466688720835
         },
         "BayesDAG": {
-            "mean": -1037.5637756347655,
-            "variance": 40025.62002041052,
-            "variance_of_mean": 1601.0248008164208
+            "mean": -1016.5599255371094,
+            "variance": 55477.796512922796,
+            "variance_of_mean": 2219.1118605169117
         },
         "DiBS": {
             "mean": -160.70900390625,
@@ -116,7 +116,7 @@
             "variance": 143.0948192257207,
             "variance_of_mean": 5.723792769028828
         },
-        "BCNP (all graph densities)": {
+        "BCNP (ER20-60)": {
             "mean": -90.63133422851563,
             "variance": 139.3661515836055,
             "variance_of_mean": 5.57464606334422

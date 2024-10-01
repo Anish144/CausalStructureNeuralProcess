@@ -1,15 +1,15 @@
 {
     "test_data": {
-        "auc": 0.4775,
-        "cpdag-shd": 64.336,
-        "log_prob": -1686.583984375,
+        "auc": 0.5209803921568628,
+        "cpdag-shd": 65.198,
+        "log_prob": -1442.92041015625,
         "mmd-tp": -1,
-        "nll_train": 100028763.28978191,
-        "nll_val": 334522601.2103404,
-        "nnz": 7.112,
+        "nll_train": 118867875.28978191,
+        "nll_val": 401241097.2103404,
+        "nnz": 6.46,
         "num_dags": 500,
-        "orientation_fscore": 0.05818119988525166,
-        "shd": 62.39
+        "orientation_fscore": 0.021467653224780264,
+        "shd": 64.004
     },
     "train_data": {},
     "val_data": {}
