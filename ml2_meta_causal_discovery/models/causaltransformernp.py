@@ -453,7 +453,7 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
             L_param = self.L_param(L_rep)
             # Q_param = self.Q_param(Q_rep)
         # Symmetrize L_param for permutation equivariance
-        L_param = (L_param + L_param.transpose(1, 2)) / 2
+        # L_param = (L_param + L_param.transpose(1, 2)) / 2
         return L_param, Q_rep
 
     def calculate_loss(self, probs, target):

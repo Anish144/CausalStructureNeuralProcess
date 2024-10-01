@@ -3,68 +3,80 @@
         "CSIvA": {
             "mean": 71.6452798461914,
             "variance": 0.03780291557544844,
-            "variance_of_mean": 0.0015121166230179376
+            "variance_of_mean": 0.0015121166230179376,
+            "sqrt_variance_of_mean": 0.038885943771727306
         },
         "BCNP": {
             "mean": 66.99703994750976,
             "variance": 1.5714840888813126,
-            "variance_of_mean": 0.06285936355525251
+            "variance_of_mean": 0.06285936355525251,
+            "sqrt_variance_of_mean": 0.25071769693273055
         },
         "AVICI": {
             "mean": 67.10887908935547,
             "variance": 2.282142908152308,
-            "variance_of_mean": 0.09128571632609232
+            "variance_of_mean": 0.09128571632609232,
+            "sqrt_variance_of_mean": 0.3021352616397039
         }
     },
     "Expected Edge F1": {
         "CSIvA": {
             "mean": 0.10012889565863191,
             "variance": 5.917227202342073e-06,
-            "variance_of_mean": 2.3668908809368291e-07
+            "variance_of_mean": 2.3668908809368291e-07,
+            "sqrt_variance_of_mean": 0.0004865070277947513
         },
         "BCNP": {
             "mean": 0.14981034267175736,
             "variance": 0.0003354844419116249,
-            "variance_of_mean": 1.3419377676464995e-05
+            "variance_of_mean": 1.3419377676464995e-05,
+            "sqrt_variance_of_mean": 0.003663246876264961
         },
         "AVICI": {
             "mean": 0.15006686015731993,
             "variance": 0.0003928244667041648,
-            "variance_of_mean": 1.5712978668166592e-05
+            "variance_of_mean": 1.5712978668166592e-05,
+            "sqrt_variance_of_mean": 0.003963959973078259
         }
     },
     "AUC": {
         "CSIvA": {
             "mean": 0.5057555555555555,
             "variance": 0.0024315379734117805,
-            "variance_of_mean": 9.726151893647122e-05
+            "variance_of_mean": 9.726151893647122e-05,
+            "sqrt_variance_of_mean": 0.00986212547762759
         },
         "BCNP": {
             "mean": 0.7219055555555556,
             "variance": 0.0027630024795846156,
-            "variance_of_mean": 0.00011052009918338463
+            "variance_of_mean": 0.00011052009918338463,
+            "sqrt_variance_of_mean": 0.01051285399800571
         },
         "AVICI": {
             "mean": 0.7192819444444445,
             "variance": 0.0033120653412744357,
-            "variance_of_mean": 0.00013248261365097743
+            "variance_of_mean": 0.00013248261365097743,
+            "sqrt_variance_of_mean": 0.011510109193703483
         }
     },
     "Negative Log Probability": {
         "CSIvA": {
             "mean": -130.28791381835939,
             "variance": 1.2603099482079652,
-            "variance_of_mean": 0.05041239792831861
+            "variance_of_mean": 0.05041239792831861,
+            "sqrt_variance_of_mean": 0.22452705388954491
         },
         "BCNP": {
             "mean": -116.71873443603516,
             "variance": 37.28529269788357,
-            "variance_of_mean": 1.4914117079153428
+            "variance_of_mean": 1.4914117079153428,
+            "sqrt_variance_of_mean": 1.2212336827631896
         },
         "AVICI": {
             "mean": -116.70492370605469,
             "variance": 33.80680756626089,
-            "variance_of_mean": 1.3522723026504357
+            "variance_of_mean": 1.3522723026504357,
+            "sqrt_variance_of_mean": 1.1628724361039933
         }
     }
 }

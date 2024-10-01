@@ -3,148 +3,176 @@
         "CSIvA": {
             "mean": 71.6452798461914,
             "variance": 0.03780291557544844,
-            "variance_of_mean": 0.0015121166230179376
+            "variance_of_mean": 0.0015121166230179376,
+            "sqrt_variance_of_mean": 0.038885943771727306
         },
         "BayesDAG": {
             "mean": 103.09064000000001,
             "variance": 2.6457715733333282,
-            "variance_of_mean": 0.10583086293333313
+            "variance_of_mean": 0.10583086293333313,
+            "sqrt_variance_of_mean": 0.3253165580374493
         },
         "DiBS": {
             "mean": 45.04375,
             "variance": 1.7132161458333288,
-            "variance_of_mean": 0.06852864583333315
+            "variance_of_mean": 0.06852864583333315,
+            "sqrt_variance_of_mean": 0.261779765897468
         },
         "BCNP": {
             "mean": 69.67640045166016,
             "variance": 2.3138323617588767,
-            "variance_of_mean": 0.09255329447035507
+            "variance_of_mean": 0.09255329447035507,
+            "sqrt_variance_of_mean": 0.30422572946803017
         },
         "BCNP (ER20-60)": {
             "mean": 66.94795974731446,
             "variance": 30.158446733930134,
-            "variance_of_mean": 1.2063378693572053
+            "variance_of_mean": 1.2063378693572053,
+            "sqrt_variance_of_mean": 1.0983341337485626
         },
         "BCNP (All Data)": {
             "mean": 62.98739974975586,
             "variance": 18.989657459990266,
-            "variance_of_mean": 0.7595862983996107
+            "variance_of_mean": 0.7595862983996107,
+            "sqrt_variance_of_mean": 0.8715424822690003
         },
         "AVICI": {
             "mean": 67.68231903076172,
             "variance": 2.665567591320334,
-            "variance_of_mean": 0.10662270365281336
+            "variance_of_mean": 0.10662270365281336,
+            "sqrt_variance_of_mean": 0.32653132109005006
         }
     },
     "Expected Edge F1": {
         "CSIvA": {
             "mean": 0.10012889565863191,
             "variance": 5.917227202342073e-06,
-            "variance_of_mean": 2.3668908809368291e-07
+            "variance_of_mean": 2.3668908809368291e-07,
+            "sqrt_variance_of_mean": 0.0004865070277947513
         },
         "BayesDAG": {
             "mean": 0.18868421696135157,
             "variance": 0.0006787888864590443,
-            "variance_of_mean": 2.7151555458361772e-05
+            "variance_of_mean": 2.7151555458361772e-05,
+            "sqrt_variance_of_mean": 0.0052107154459212005
         },
         "DiBS": {
             "mean": 0.16490744377058422,
             "variance": 0.0004500991049160848,
-            "variance_of_mean": 1.8003964196643392e-05
+            "variance_of_mean": 1.8003964196643392e-05,
+            "sqrt_variance_of_mean": 0.004243107846454458
         },
         "BCNP": {
             "mean": 0.15999952347259158,
             "variance": 0.00042935971417000637,
-            "variance_of_mean": 1.7174388566800255e-05
+            "variance_of_mean": 1.7174388566800255e-05,
+            "sqrt_variance_of_mean": 0.004144199387915627
         },
         "BCNP (ER20-60)": {
             "mean": 0.15046357576991867,
             "variance": 0.00030762564585785603,
-            "variance_of_mean": 1.2305025834314241e-05
+            "variance_of_mean": 1.2305025834314241e-05,
+            "sqrt_variance_of_mean": 0.0035078520257152013
         },
         "BCNP (All Data)": {
             "mean": 0.13207197059542955,
             "variance": 0.0001637820311320681,
-            "variance_of_mean": 6.551281245282724e-06
+            "variance_of_mean": 6.551281245282724e-06,
+            "sqrt_variance_of_mean": 0.0025595470781532275
         },
         "AVICI": {
             "mean": 0.15280174471754068,
             "variance": 0.00037948862540030715,
-            "variance_of_mean": 1.5179545016012286e-05
+            "variance_of_mean": 1.5179545016012286e-05,
+            "sqrt_variance_of_mean": 0.0038960935584264767
         }
     },
     "AUC": {
         "CSIvA": {
             "mean": 0.5057555555555555,
             "variance": 0.0024315379734117805,
-            "variance_of_mean": 9.726151893647122e-05
+            "variance_of_mean": 9.726151893647122e-05,
+            "sqrt_variance_of_mean": 0.00986212547762759
         },
         "BayesDAG": {
             "mean": 0.6680527777777777,
             "variance": 0.007060314481256432,
-            "variance_of_mean": 0.0002824125792502573
+            "variance_of_mean": 0.0002824125792502573,
+            "sqrt_variance_of_mean": 0.016805135502287905
         },
         "DiBS": {
             "mean": 0.7410666666666667,
             "variance": 0.002027521532600308,
-            "variance_of_mean": 8.110086130401232e-05
+            "variance_of_mean": 8.110086130401232e-05,
+            "sqrt_variance_of_mean": 0.009005601662521628
         },
         "BCNP": {
             "mean": 0.7289861111111111,
             "variance": 0.003242874610178754,
-            "variance_of_mean": 0.00012971498440715015
+            "variance_of_mean": 0.00012971498440715015,
+            "sqrt_variance_of_mean": 0.01138924863224744
         },
         "BCNP (ER20-60)": {
             "mean": 0.7259527777777778,
             "variance": 0.003500820842978394,
-            "variance_of_mean": 0.00014003283371913575
+            "variance_of_mean": 0.00014003283371913575,
+            "sqrt_variance_of_mean": 0.011833546962729972
         },
         "BCNP (All Data)": {
             "mean": 0.7141236111111111,
             "variance": 0.002256270322948816,
-            "variance_of_mean": 9.025081291795264e-05
+            "variance_of_mean": 9.025081291795264e-05,
+            "sqrt_variance_of_mean": 0.009500042785059056
         },
         "AVICI": {
             "mean": 0.7228833333333333,
             "variance": 0.003317558581693673,
-            "variance_of_mean": 0.00013270234326774691
+            "variance_of_mean": 0.00013270234326774691,
+            "sqrt_variance_of_mean": 0.011519650310132983
         }
     },
     "Negative Log Probability": {
         "CSIvA": {
             "mean": -130.28791381835939,
             "variance": 1.2603099482079652,
-            "variance_of_mean": 0.05041239792831861
+            "variance_of_mean": 0.05041239792831861,
+            "sqrt_variance_of_mean": 0.22452705388954491
         },
         "BayesDAG": {
             "mean": -154.0947430419922,
             "variance": 126.46136576135018,
-            "variance_of_mean": 5.0584546304540075
+            "variance_of_mean": 5.0584546304540075,
+            "sqrt_variance_of_mean": 2.2491008493293507
         },
         "DiBS": {
             "mean": -125.14849609375,
             "variance": 57.83999699987526,
-            "variance_of_mean": 2.3135998799950106
+            "variance_of_mean": 2.3135998799950106,
+            "sqrt_variance_of_mean": 1.5210522278985066
         },
         "BCNP": {
             "mean": -116.10628234863282,
             "variance": 39.63649730033104,
-            "variance_of_mean": 1.5854598920132414
+            "variance_of_mean": 1.5854598920132414,
+            "sqrt_variance_of_mean": 1.25915046440576
         },
         "BCNP (ER20-60)": {
             "mean": -116.90978088378907,
             "variance": 44.276094154144324,
-            "variance_of_mean": 1.771043766165773
+            "variance_of_mean": 1.771043766165773,
+            "sqrt_variance_of_mean": 1.3308056830979393
         },
         "BCNP (All Data)": {
             "mean": -119.44441772460938,
             "variance": 17.440980610003646,
-            "variance_of_mean": 0.6976392244001458
+            "variance_of_mean": 0.6976392244001458,
+            "sqrt_variance_of_mean": 0.8352480017337042
         },
         "AVICI": {
             "mean": -116.66981475830079,
             "variance": 36.46768671350089,
-            "variance_of_mean": 1.4587074685400356
+            "variance_of_mean": 1.4587074685400356,
+            "sqrt_variance_of_mean": 1.2077696256074812
         }
     }
 }
