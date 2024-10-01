@@ -147,12 +147,12 @@ if __name__ == "__main__":
     parser.add_argument('--model_list', type=list_of_strings)
     args = retun_default_args(parser)
 
-    num_samples = 1000
+    num_samples = 500
 
     data_files = [
-        # "gplvm_20var_ER20",
-        # "gplvm_20var_ER40",
-        # "gplvm_20var_ER60",
+        "gplvm_20var_ER20",
+        "gplvm_20var_ER40",
+        "gplvm_20var_ER60",
         # "neuralnet_20var_ERL20U60",
         # "linear_20var_ER20",
         # "linear_20var_ER40",
@@ -160,7 +160,7 @@ if __name__ == "__main__":
         # "neuralnet_20var_ER20",
         # "neuralnet_20var_ER40",
         # "neuralnet_20var_ER60",
-        "syntren"
+        # "syntren"
     ]
 
     for data in data_files:

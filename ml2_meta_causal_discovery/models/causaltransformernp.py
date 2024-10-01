@@ -452,6 +452,8 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
             # shape [batch_size, num_nodes, num_nodes]
             L_param = self.L_param(L_rep)
             # Q_param = self.Q_param(Q_rep)
+        # Symmetrize L_param for permutation equivariance
+        L_param = (L_param + L_param.transpose(1, 2)) / 2
         return L_param, Q_rep
 
     def calculate_loss(self, probs, target):
@@ -556,6 +558,7 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
         )
         # Find probs
         probs = torch.sigmoid(L_param)
+        print(probs)
         # shape [num_samples, batch_size, num_nodes, num_nodes]
         # Elementwise multiplication
         all_probs = torch.mul(probs[None], all_masks)
