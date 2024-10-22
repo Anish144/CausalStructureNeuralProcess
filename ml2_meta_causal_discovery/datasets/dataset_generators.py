@@ -206,14 +206,20 @@ class ClassifyDatasetGenerator(IterableDataset):
         )
         # Loop over to batch; a different function (causal graph) for each batch
         for b in trange(self.batch_size):
-            expected_node_degree = self.sample_uniform_expected_degree()
-            # Randomly sample a graph type
-            curr_graph_type = np.random.choice(self.graph_type)
-            dag = generate_synthetic_dag(
-                d=self.num_variables,
-                s0=expected_node_degree,
-                graph_type=curr_graph_type,
-            )
+            while True:
+                expected_node_degree = self.sample_uniform_expected_degree()
+                # Randomly sample a graph type
+                curr_graph_type = np.random.choice(self.graph_type)
+                try:
+                    dag = generate_synthetic_dag(
+                        d=self.num_variables,
+                        s0=expected_node_degree,
+                        graph_type=curr_graph_type,
+                    )
+                    break  # Exit the loop if DAG generation is successful
+                except Exception as e:
+                    # Optionally log the exception or handle specific exceptions
+                    continue  # Continue looping if an exception occurs
 
             # Need to permute the graph so that the graph is randomised.
             permutation_indices = np.random.permutation(self.num_variables)
