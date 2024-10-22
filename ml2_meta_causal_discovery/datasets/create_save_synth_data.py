@@ -64,14 +64,14 @@ def hpc_main(args):
 
 
 def hpc_classify_main(args):
-    num_vars = 20
+    num_vars = args.num_vars
     function_gen = "gplvm"
     usecase = args.folder_name
     # Rest of the code...
     num_samples = 1000
     graph_type = ["ER"]
-    exp_edges_upper = args.exp_edges_upper
-    exp_edges_lower = args.exp_edges_lower
+    exp_edges_upper = args.exp_edges_upper * num_vars
+    exp_edges_lower = args.exp_edges_lower * num_vars
 
     if exp_edges_upper == exp_edges_lower:
         name = f"{function_gen}_{num_vars}var_ER{args.exp_edges_lower}"
@@ -151,6 +151,12 @@ if __name__ == "__main__":
         help="Folder where the Neural Process Family is stored.",
     )
     parser.add_argument(
+        "--num_vars",
+        "-nv",
+        type=int,
+        default=3,
+    )
+    parser.add_argument(
         "--data_start",
         "-ds",
         type=int,
@@ -172,13 +178,13 @@ if __name__ == "__main__":
         "--exp_edges_upper",
         "-eeu",
         type=int,
-        default=20,
+        default=1,
     )
     parser.add_argument(
         "--exp_edges_lower",
         "-eel",
         type=int,
-        default=20,
+        default=3,
     )
     parser.add_argument(
         "--folder_name",
