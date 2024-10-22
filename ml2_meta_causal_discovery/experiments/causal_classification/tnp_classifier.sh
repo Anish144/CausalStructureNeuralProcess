@@ -58,9 +58,9 @@ python3 train_causal_classify.py \
     --learning_rate=2e-4 \
     --batch_size=32 \
     --max_epochs=2 \
-    --run_name="test_large_model_float32" \
+    --run_name="test_padding" \
     --data_file="gplvm_neuralnet_20var_ERSFL20U60" \
-    --num_workers=12 \
+    --num_workers=0 \
     --num_layers_encoder=4 \
     --num_layers_decoder=4 \
     --dim_model=128 \
@@ -68,7 +68,7 @@ python3 train_causal_classify.py \
     --decoder="probabilistic" \
     --seed=0 \
     --lr_warmup_ratio=0.1 \
-    --num_nodes=20 \
+    --num_nodes=21 \
     --nhead=8 \
     --n_perm_samples=25 \
     --sinkhorn_iter=1000 \

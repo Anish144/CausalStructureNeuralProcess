@@ -71,6 +71,19 @@ def transformer_classifier_split():
     return mycollate
 
 
+def transformer_classifier_split_withpadding():
+    def mycollate(batch):
+        full_data = np.stack([i[0] for i in batch], axis=0)
+        full_target = np.stack([i[1] for i in batch], axis=0)
+        full_mask = np.stack([i[2] for i in batch], axis=0)
+        inputs = th.from_numpy(full_data).float()
+        targets = th.from_numpy(full_target).float()
+        mask = th.from_numpy(full_mask).float()
+        return inputs, targets, mask
+
+    return mycollate
+
+
 def transformer_infinite_classifier_split():
     def mycollate(batch):
         full_data = batch[0][1]
@@ -176,11 +189,20 @@ class MultipleFileDatasetWithPadding(MultipleFileDataset):
             target_data - target_data.mean(axis=0)[None, :]
         ) / target_data.std(axis=0)[None, :]
         # Pad the data
-        if target_data.shape[-1] < self.max_node_num:
-            target_data = np.pad(
+        num_nodes = target_data.shape[-1]
+        if num_nodes < self.max_node_num:
+            new_target_data = np.pad(
                 target_data,
-                ((0, 0), (0, self.max_node_num - target_data.shape[-1])),
+                ((0, 0), (0, self.max_node_num - num_nodes)),
                 mode="constant",
                 constant_values=0,
             )
-        yield target_data, graph
+            # Create attention mask
+            attention_mask = np.zeros_like(target_data)
+            # Set mask value to - inf
+            zero_mask = np.zeros((target_data.shape[0], self.max_node_num - num_nodes)) - np.inf
+            attention_mask = np.concatenate([attention_mask, zero_mask], axis=-1)
+            target_data = new_target_data
+        else:
+            attention_mask = np.ones_like(target_data)
+        yield target_data, graph, attention_mask

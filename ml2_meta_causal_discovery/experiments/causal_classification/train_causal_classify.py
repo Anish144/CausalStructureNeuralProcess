@@ -10,7 +10,7 @@ import numpy as np
 import torch
 
 from ml2_meta_causal_discovery.utils.args import retun_default_args
-from ml2_meta_causal_discovery.utils.datautils import MultipleFileDataset
+from ml2_meta_causal_discovery.utils.datautils import MultipleFileDatasetWithPadding
 from ml2_meta_causal_discovery.utils.train_classifier_model import (
     CausalClassifierTrainer,
 )
@@ -25,27 +25,27 @@ import json
 
 def npf_main(args):
     # Start weights and biases
-    run = wandb.init(
-        # Set the project where this run will be logged
-        project="transformer_causal_classifier",
-        name=args.run_name,
-        # Track hyperparameters and run metadata
-        config=vars(args),
-    )
+    # run = wandb.init(
+    #     # Set the project where this run will be logged
+    #     project="transformer_causal_classifier",
+    #     name=args.run_name,
+    #     # Track hyperparameters and run metadata
+    #     config=vars(args),
+    # )
 
     work_dir = Path(args.work_dir)
     data_dir = work_dir / "datasets/data/synth_training_data" / args.data_file
     # Get the training and validation datasets
     train_dir = data_dir / "train"
     train_files = list(train_dir.iterdir())
-    dataset = MultipleFileDataset(
-        [i for i in train_files if i.suffix == ".hdf5"], sample_size=args.sample_size
+    dataset = MultipleFileDatasetWithPadding(
+        [i for i in train_files if i.suffix == ".hdf5"], sample_size=args.sample_size, max_node_num=21,
     )
     val_dir = data_dir / "val"
     val_files = list(val_dir.iterdir())
     # Only use like 1000 samples for validation
-    val_dataset = MultipleFileDataset(
-        [i for i in val_files if i.suffix == ".hdf5"], sample_size=args.sample_size
+    val_dataset = MultipleFileDatasetWithPadding(
+        [i for i in val_files if i.suffix == ".hdf5"], sample_size=args.sample_size, max_node_num=21,
     )
 
     TNPD_KWARGS = dict(

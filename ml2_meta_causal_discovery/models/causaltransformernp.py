@@ -482,7 +482,7 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
         loss = loss_per_edge.mean(dim=1)
         return loss
 
-    def forward(self, target_data, graph, is_training=True):
+    def forward(self, target_data, graph, mask: Optional[torch.Tensor] = None, is_training=True):
         """
         Args:
         -----
@@ -504,7 +504,7 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
             target_data = target_data.unsqueeze(-1)
         # Extract representation
         # shape [batch_size, num_nodes, 1, d_model]
-        representation = self.encode(target_data=target_data)
+        representation = self.encode(target_data=target_data, mask=mask)
         # Decode the representation
         # shape [batch_size, num_nodes, d_model]
         representation = representation.squeeze(2)

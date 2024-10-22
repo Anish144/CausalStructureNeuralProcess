@@ -38,20 +38,20 @@ def build_mlp(dim_in, dim_hid, dim_out, depth):
     if dim_in == dim_hid:
         modules = [
             nn.Sequential(
-                nn.Linear(dim_in, dim_hid),
+                nn.Linear(dim_in, dim_hid, bias=False),
                 nn.ReLU(),
             )
         ]
     else:
-        modules = [nn.Linear(dim_in, dim_hid), nn.ReLU()]
+        modules = [nn.Linear(dim_in, dim_hid, bias=False), nn.ReLU()]
     for _ in range(int(depth) - 2):
         modules.append(
             nn.Sequential(
-                nn.Linear(dim_hid, dim_hid),
+                nn.Linear(dim_hid, dim_hid, bias=False),
                 nn.ReLU(),
             )
         )
-    modules.append(nn.Linear(dim_hid, dim_out))
+    modules.append(nn.Linear(dim_hid, dim_out, bias=False))
     return nn.Sequential(*modules)
 
 
@@ -89,7 +89,7 @@ class CausalTransformerEncoder(nn.Module):
                 src = src.permute(0, 2, 1, 3)
                 # shape [batch_size * num_nodes, num_samples, d_model]
                 src = src.contiguous().view(batch_size * num_nodes, num_samples, d_model)
-                src = mod(src, src_mask=src_mask, src_key_padding_mask=src_key_padding_mask, is_causal=is_causal)
+                src = mod(src, src_mask=src_mask, src_key_padding_mask=None, is_causal=is_causal)
                 # Reshape the tensor back to [batch_size, num_nodes, num_samples, d_model]
                 src = src.view(batch_size, num_nodes, num_samples, d_model)
             else:
@@ -97,7 +97,17 @@ class CausalTransformerEncoder(nn.Module):
                 src = src.permute(0, 2, 1, 3)
                 # shape [batch_size * num_samples, num_nodes, d_model]
                 src = src.contiguous().view(batch_size * num_samples, num_nodes, d_model)
-                src = mod(src, src_mask=src_mask, src_key_padding_mask=src_key_padding_mask, is_causal=is_causal)
+                # Extra zeros for the query
+                query_mask = torch.zeros_like(src_key_padding_mask[:, 0:1, :])
+                query_mask[:, :, -1] -= torch.inf
+                node_src_key_padding_mask = torch.cat(
+                    (src_key_padding_mask, query_mask), dim=1
+                )
+                node_src_key_padding_mask = node_src_key_padding_mask.contiguous().view(batch_size * num_samples, num_nodes)
+                src = mod(src, src_mask=src_mask, src_key_padding_mask=node_src_key_padding_mask, is_causal=is_causal)
+                # Make masking position back to zero
+                bool_pad = node_src_key_padding_mask == -float("inf")
+                src = src.masked_fill_(bool_pad.unsqueeze(-1), 0)
                 # Reshape the tensor back to [batch_size, num_samples, num_nodes, d_model]
                 src = src.contiguous().view(batch_size, num_samples, num_nodes, d_model)
         return src
@@ -428,14 +438,14 @@ class CausalTNPEncoder(nn.Module):
             summary_rep = summary_rep.contiguous().view(batch, num_nodes, 1, d_model)
             return summary_rep
 
-    def encode(self, target_data):
+    def encode(self, target_data, mask=None):
         # First step is to embed the nodes and samples
         # shape [batch_size, num_samples + 1, num_nodes, d_model]
         embedding = self.embed(target_data)
         # Encode the data
         # TODO: Take advantage of fastpath for causal transformer!
         # shape [batch_size, num_samples + 1, num_nodes, d_model]
-        representation = self.encoder(embedding)
+        representation = self.encoder(embedding, src_key_padding_mask=mask)
         query_rep = representation[:, -1:, :, :]
         # shape [batch_size, num_nodes, 1, d_model]
 

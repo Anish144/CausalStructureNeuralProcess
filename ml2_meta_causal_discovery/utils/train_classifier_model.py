@@ -7,6 +7,7 @@ import torch as th
 from ml2_meta_causal_discovery.utils.datautils import (
     transformer_classifier_split,
     transformer_classifier_val_split,
+    transformer_classifier_split_withpadding,
 )
 import wandb
 from tqdm import tqdm
@@ -88,19 +89,19 @@ class CausalClassifierTrainer:
         self.train_loader = th.utils.data.DataLoader(
             self.train_dataset, batch_size=self.batch_size, shuffle=False,
             num_workers=self.num_workers, pin_memory=True,
-            persistent_workers=True,
-            collate_fn=transformer_classifier_split(),
+            persistent_workers=False,
+            collate_fn=transformer_classifier_split_withpadding(),
         )
         self.val_loader = th.utils.data.DataLoader(
             self.validation_dataset, batch_size=4, shuffle=False,
             num_workers=self.num_workers, pin_memory=True,
-            persistent_workers=True,
-            collate_fn=transformer_classifier_split(),
+            persistent_workers=False,
+            collate_fn=transformer_classifier_split_withpadding(),
         )
         self.test_loader = th.utils.data.DataLoader(
             self.test_dataset, batch_size=4, shuffle=False,
             num_workers=self.num_workers, pin_memory=True,
-            persistent_workers=True,
+            persistent_workers=False,
             collate_fn=transformer_classifier_val_split(),
         )
 
@@ -130,12 +131,13 @@ class CausalClassifierTrainer:
             all_loss = 0
             for i, data in enumerate(tqdm(test_loader, desc="Testing")):
                 # Get the inputs and targets
-                inputs, targets = data
+                inputs, targets, attention_mask = data
                 targets = targets.to("cuda", dtype=dtype)
                 inputs = inputs.to("cuda", dtype=dtype)
-                inputs = (inputs - inputs.mean(dim=1, keepdim=True)) / inputs.std(dim=1, keepdim=True)
+                attention_mask = attention_mask.to("cuda", dtype=dtype)
+                # inputs = (inputs - inputs.mean(dim=1, keepdim=True)) / inputs.std(dim=1, keepdim=True)
                 # Forward pass
-                adj_logit = self.model(inputs, graph=targets, is_training=False)
+                adj_logit = self.model(inputs, graph=targets, mask=attention_mask, is_training=False)
 
                 if isinstance(adj_logit, tuple):
                     adj_logit = adj_logit[0]
@@ -184,12 +186,13 @@ class CausalClassifierTrainer:
         all_preds = 0
         for i, data in enumerate(tqdm(val_loader, desc="Validation")):
             # Get the inputs and targets
-            inputs, targets = data
+            inputs, targets, attention_mask = data
             targets = targets.to("cuda", dtype=dtype)
             inputs = inputs.to("cuda", dtype=dtype)
-            inputs = (inputs - inputs.mean(dim=1, keepdim=True)) / inputs.std(dim=1, keepdim=True)
+            attention_mask = attention_mask.to("cuda", dtype=dtype)
+            # inputs = (inputs - inputs.mean(dim=1, keepdim=True)) / inputs.std(dim=1, keepdim=True)
             # Forward pass
-            adj_logit = self.model(inputs, graph=targets, is_training=False)
+            adj_logit = self.model(inputs, graph=targets, is_training=False, mask=attention_mask)
 
             if isinstance(adj_logit, tuple):
                 adj_logit = adj_logit[0]
@@ -232,17 +235,18 @@ class CausalClassifierTrainer:
                 epoch=epoch, step=i, lr_warmup_steps=lr_warmup_steps, is_avici=is_avici
             )
             # Get the inputs and targets
-            inputs, targets = data
+            inputs, targets, attention_mask = data
             targets = targets.to("cuda", dtype=dtype)
             inputs = inputs.to("cuda",  dtype=dtype)
+            attention_mask = attention_mask.to("cuda", dtype=dtype)
 
             # Normaliser the inputs across axis 1
-            inputs = (inputs - inputs.mean(dim=1, keepdim=True)) / inputs.std(dim=1, keepdim=True)
+            # inputs = (inputs - inputs.mean(dim=1, keepdim=True)) / inputs.std(dim=1, keepdim=True)
 
             # Zero the parameter gradients
             self.optimizer.zero_grad()
             # Forward pass
-            logits = self.model(inputs, graph=targets)
+            logits = self.model(inputs, graph=targets, mask=attention_mask)
             if is_avici:
                 if i % 500 == 0:
                    loss = self.model.calculate_loss(logits, targets, update_regulariser=True)
