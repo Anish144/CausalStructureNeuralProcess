@@ -6,7 +6,7 @@ This will not use skorch.
 import torch as th
 from ml2_meta_causal_discovery.utils.datautils import (
     transformer_classifier_split,
-    transformer_classifier_val_split,
+    transformer_classifier_val_split_withpadding,
     transformer_classifier_split_withpadding,
 )
 import wandb
@@ -102,7 +102,7 @@ class CausalClassifierTrainer:
             self.test_dataset, batch_size=4, shuffle=False,
             num_workers=self.num_workers, pin_memory=True,
             persistent_workers=False,
-            collate_fn=transformer_classifier_val_split(),
+            collate_fn=transformer_classifier_val_split_withpadding(),
         )
 
     def apply_learning_rate_warmup(self, epoch, step, lr_warmup_steps, is_avici=False):
@@ -263,7 +263,7 @@ class CausalClassifierTrainer:
                 metric_dict = {
                     "train loss": loss.mean().item(),
                 }
-                if i % 10000 == 0:
+                if i % 10000 == 0 and i > 0:
                     # don't do validation with autoregressive as its too expensive
                     if self.model.__class__.__name__ != "CausalAutoregressiveDecoder":
                         metric_dict = self.validate_single_epoch(val_loader, metric_dict)

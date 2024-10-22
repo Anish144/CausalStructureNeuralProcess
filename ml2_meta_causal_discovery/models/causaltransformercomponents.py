@@ -210,7 +210,7 @@ class CausalAdjacencyMatrix(nn.Module):
             self.in_proj_bias.data.zero_()
             self.out_proj_bias.data.zero_()
 
-        def forward(self, representation):
+        def forward(self, representation, padding_mask=None):
             """
             Performs attention over the representation to compute the adjacency matrix.
 
@@ -270,6 +270,9 @@ class CausalAdjacencyMatrix(nn.Module):
             attn_weight = attn_weight.permute(0, 2, 3, 1)
             pred = attn_weight @ self.out_proj_weight + self.out_proj_bias
             pred = pred.squeeze(-1)
+            pred = pred
+            new_mask = padding_mask.unsqueeze(1) + padding_mask.unsqueeze(2)
+            pred = pred + new_mask
             return pred
 
 

@@ -435,22 +435,22 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
             depth=emb_depth,
         )
 
-    def decode(self, representation, is_training=True):
+    def decode(self, representation, is_training=True, mask: Optional[torch.Tensor] = None):
         if not self.Q_before_L:
             # shape [batch_size, nu`m_nodes, d_model]
-            L_rep = self.decoder_L(representation, memory=None)
+            L_rep = self.decoder_L(representation, memory=None, tgt_key_padding_mask=mask)
             # We will pass L_param into permutation
-            Q_rep = self.decoder_Q(L_rep, memory=None)
+            Q_rep = self.decoder_Q(L_rep, memory=None, tgt_key_padding_mask=mask)
             # shape [batch_size, num_nodes, num_nodes]
-            L_param = self.L_param(L_rep)
+            L_param = self.L_param(L_rep, padding_mask=mask)
             # Q_param = self.Q_param(Q_rep)
         else:
             # shape [batch_size, num_nodes, d_model]
-            Q_rep = self.decoder_Q(representation, memory=None)
+            Q_rep = self.decoder_Q(representation, memory=None, tgt_key_padding_mask=mask)
             # We will pass Q_param into L
-            L_rep = self.decoder_L(Q_rep, memory=None)
+            L_rep = self.decoder_L(Q_rep, memory=None, tgt_key_padding_mask=mask)
             # shape [batch_size, num_nodes, num_nodes]
-            L_param = self.L_param(L_rep)
+            L_param = self.L_param(L_rep, padding_mask=mask)
             # Q_param = self.Q_param(Q_rep)
         # Symmetrize L_param for permutation equivariance
         L_param = (L_param + L_param.transpose(1, 2)) / 2
@@ -510,8 +510,10 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
         representation = representation.squeeze(2)
         # L: shape [batch_size, num_nodes, num_nodes]
         # Q: shape [batch_size, num_nodes, d_model]
-        L_param, Q_rep = self.decode(representation=representation)
+        decoder_mask = mask[:, 0, :]
+        L_param, Q_rep = self.decode(representation=representation, mask=decoder_mask)
         # shape [batch_size, num_nodes]
+        # we want padded part to have inf
         p_param = self.p_param(Q_rep).squeeze(-1)
         ovector = torch.arange(
             1, self.num_nodes + 1,
@@ -526,6 +528,10 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
         # Sample permutations
         # shape = [batch_size, n_samples, num_nodes, num_nodes]
         Q_param = torch.functional.F.logsigmoid(Q_param)
+        Q_mask = decoder_mask.unsqueeze(1) + decoder_mask.unsqueeze(2)
+        # Set diagonal to 0
+        Q_mask = Q_mask * (1 - torch.eye(Q_mask.size(-1), device=Q_mask.device))
+        Q_param = Q_param + Q_mask
         perm, _ = sample_permutation(
             log_alpha=Q_param,
             temp=1.0,
@@ -561,10 +567,11 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
         # shape [num_samples, batch_size, num_nodes, num_nodes]
         # Elementwise multiplication
         all_probs = torch.mul(probs[None], all_masks)
+        import pdb; pdb.set_trace()
 
         return all_probs
 
-    def sample(self, target_data: torch.Tensor, num_samples: int):
+    def sample(self, target_data: torch.Tensor, num_samples: int, mask: Optional[torch.Tensor] = None):
         """
         Sample DAGs, one for each permutation.
 
@@ -575,11 +582,11 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
         # Override number of samples
         self.n_perm_samples = num_samples
         # probs: [num_samples, batch_size, num_nodes, num_nodes]
-        probs = self.forward(target_data, graph=None, is_training=False)
+        probs = self.forward(target_data, graph=None, is_training=False, mask=mask)
         # Sample from the distribution
         existence_dist = torch.distributions.Bernoulli(
             probs=probs
         )
         samples = existence_dist.sample()
-        return samples
+        return samples, mask
 

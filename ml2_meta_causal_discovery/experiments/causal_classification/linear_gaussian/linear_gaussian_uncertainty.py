@@ -15,7 +15,7 @@ from ml2_meta_causal_discovery.models.causaltransformernp import (
 import h5py
 import json
 import torch as th
-from ml2_meta_causal_discovery.utils.datautils import MultipleFileDataset
+from ml2_meta_causal_discovery.utils.datautils import MultipleFileDatasetWithPadding
 from ml2_meta_causal_discovery.utils.train_classifier_model import (
     CausalClassifierTrainer,
 )
@@ -26,9 +26,9 @@ from functools import partial
 
 
 MODELS = {
-    "avici": AviciDecoder,
+    # "avici": AviciDecoder,
     "causal_qbeforel": CausalProbabilisticDecoder,
-    "csiva": CsivaDecoder,
+    # "csiva": CsivaDecoder,
  }
 
 # MODELS = {
@@ -105,11 +105,11 @@ def main(
     train_file, test_file = generate_data(
         work_dir, args.sample_size, args.num_datasets
     )
-    train_dataset = MultipleFileDataset(
-        [train_file],
+    train_dataset = MultipleFileDatasetWithPadding(
+        [train_file], max_node_num=3,
     )
-    test_dataset = MultipleFileDataset(
-        [test_file],
+    test_dataset = MultipleFileDatasetWithPadding(
+        [test_file], max_node_num=3,
     )
 
     # Train all the models
@@ -123,7 +123,7 @@ def main(
         num_layers_decoder=4,
         device="cuda" if th.cuda.is_available() else "cpu",
         dtype=th.bfloat16,
-        num_nodes=2,
+        num_nodes=3,
         n_perm_samples=100,
         sinkhorn_iter=1000,
         use_positional_encoding=False,
@@ -179,7 +179,7 @@ def main(
         del trainer
 
     # Save the results
-    with open(work_dir / "experiments" / "causal_classification" / "linear_gaussian" / "results_2var_withqlbefore.json", "w") as f:
+    with open(work_dir / "experiments" / "causal_classification" / "linear_gaussian" / "results_2var_padding.json", "w") as f:
         json.dump(all_results, f)
 
     # Plot
