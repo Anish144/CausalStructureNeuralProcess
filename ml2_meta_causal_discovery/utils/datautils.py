@@ -154,3 +154,33 @@ class MultipleFileDataset(th.utils.data.Dataset):
 
     def __len__(self):
         return sum([i.shape[0] for i in self.all_data])
+
+
+class MultipleFileDatasetWithPadding(MultipleFileDataset):
+    def __init__(
+        self, file_list: list, max_node_num: int=10, sample_size: Optional[int]=None,
+    ):
+        super().__init__(file_list, sample_size)
+        self.max_node_num = max_node_num
+
+    def load_data(self, data_idx, file_counter):
+        target_data = self.all_data[file_counter][data_idx]
+        graph = self.all_graphs[file_counter][data_idx]
+        if self.sample_size is not None:
+            indices = np.random.choice(
+                target_data.shape[0], self.sample_size, replace=False
+            )
+            target_data = target_data[indices]
+        # Normalise the dataset
+        target_data = (
+            target_data - target_data.mean(axis=0)[None, :]
+        ) / target_data.std(axis=0)[None, :]
+        # Pad the data
+        if target_data.shape[-1] < self.max_node_num:
+            target_data = np.pad(
+                target_data,
+                ((0, 0), (0, self.max_node_num - target_data.shape[-1])),
+                mode="constant",
+                constant_values=0,
+            )
+        yield target_data, graph
