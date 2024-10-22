@@ -172,7 +172,7 @@ if __name__ == "__main__":
         "--batch_size",
         "-bs",
         type=int,
-        default=50000,
+        default=60000,
     )
     parser.add_argument(
         "--exp_edges_upper",
