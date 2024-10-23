@@ -145,8 +145,8 @@ class CausalClassifierTrainer:
                 loss = self.model.calculate_loss(adj_logit, targets)
                 all_loss += th.sum(loss).cpu().item()
                 if calc_metrics:
-                    predictions = self.model.sample(
-                        inputs, num_samples=num_samples
+                    predictions, _ = self.model.sample(
+                        inputs, num_samples=num_samples, mask=attention_mask
                     )
                     auc = auc_graph_scores(targets, predictions)
                     log_prob = log_prob_graph_scores(targets, predictions.to(targets.device))

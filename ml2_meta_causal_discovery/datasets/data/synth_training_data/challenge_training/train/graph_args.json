@@ -1,1 +1,1 @@
-{"graph_type": ["ER", "SF"], "graph_degrees_upper": 24, "graph_degrees_lower": 8, "num_variables": 8, "num_samples": 1000, "function_generator": "gplvm_neuralnet"}
+{"graph_type": ["ER", "SF"], "graph_degrees_upper": 18, "graph_degrees_lower": 6, "num_variables": 6, "num_samples": 1000, "function_generator": "gplvm_neuralnet"}
