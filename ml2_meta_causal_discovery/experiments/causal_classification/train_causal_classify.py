@@ -25,13 +25,13 @@ import json
 
 def npf_main(args):
     # Start weights and biases
-    # run = wandb.init(
-    #     # Set the project where this run will be logged
-    #     project="transformer_causal_classifier",
-    #     name=args.run_name,
-    #     # Track hyperparameters and run metadata
-    #     config=vars(args),
-    # )
+    run = wandb.init(
+        # Set the project where this run will be logged
+        project="transformer_causal_classifier",
+        name=args.run_name,
+        # Track hyperparameters and run metadata
+        config=vars(args),
+    )
 
     work_dir = Path(args.work_dir)
     data_dir = work_dir / "datasets/data/synth_training_data" / args.data_file
