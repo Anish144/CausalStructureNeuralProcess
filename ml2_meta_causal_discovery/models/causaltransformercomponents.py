@@ -98,11 +98,7 @@ class CausalTransformerEncoder(nn.Module):
                 # shape [batch_size * num_samples, num_nodes, d_model]
                 src = src.contiguous().view(batch_size * num_samples, num_nodes, d_model)
                 # Extra zeros for the query
-                query_mask = torch.zeros_like(src_key_padding_mask[:, 0:1, :])
-                query_mask[:, :, -1] -= torch.inf
-                node_src_key_padding_mask = torch.cat(
-                    (src_key_padding_mask, query_mask), dim=1
-                )
+                node_src_key_padding_mask = src_key_padding_mask
                 node_src_key_padding_mask = node_src_key_padding_mask.contiguous().view(batch_size * num_samples, num_nodes)
                 src = mod(src, src_mask=src_mask, src_key_padding_mask=node_src_key_padding_mask, is_causal=is_causal)
                 # Make masking position back to zero

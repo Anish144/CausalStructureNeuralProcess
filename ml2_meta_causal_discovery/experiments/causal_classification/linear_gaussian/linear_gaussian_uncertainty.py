@@ -202,6 +202,9 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    # Set all seeds
+    th.manual_seed(0)
+
     main(
         args=args,
     )

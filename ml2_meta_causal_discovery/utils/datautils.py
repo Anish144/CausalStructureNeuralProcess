@@ -214,8 +214,15 @@ class MultipleFileDatasetWithPadding(MultipleFileDataset):
             # Create attention mask
             attention_mask = np.zeros_like(target_data)
             # Set mask value to - inf
-            zero_mask = np.zeros((target_data.shape[0], self.max_node_num - num_nodes)) - 1e20
+            zero_mask = np.zeros((target_data.shape[0], self.max_node_num - num_nodes)) - 1e30
             attention_mask = np.concatenate([attention_mask, zero_mask], axis=-1)
+            # Mask for the query
+            query_mask = np.zeros((1, num_nodes))
+            query_mask_pad = np.zeros((1, self.max_node_num - num_nodes)) - 1e30
+            full_query_mask = np.concatenate(
+                [query_mask, query_mask_pad], axis=-1
+            )
+            attention_mask = np.concatenate([attention_mask, full_query_mask], axis=0)
             target_data = new_target_data
 
             # Pad the graph with 0s
@@ -226,7 +233,8 @@ class MultipleFileDatasetWithPadding(MultipleFileDataset):
                 constant_values=0,
             )
         else:
-            attention_mask = np.ones_like(target_data)
-
+            attention_mask = np.zeros_like(target_data)
+            query_mask = np.zeros((1, num_nodes))
+            attention_mask = np.concatenate([attention_mask, query_mask], axis=0)
 
         yield target_data, graph, attention_mask

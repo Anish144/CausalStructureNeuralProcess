@@ -567,7 +567,6 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
         # shape [num_samples, batch_size, num_nodes, num_nodes]
         # Elementwise multiplication
         all_probs = torch.mul(probs[None], all_masks)
-
         return all_probs
 
     def sample(self, target_data: torch.Tensor, num_samples: int, mask: Optional[torch.Tensor] = None):
