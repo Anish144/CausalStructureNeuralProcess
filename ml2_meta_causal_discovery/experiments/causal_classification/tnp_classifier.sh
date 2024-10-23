@@ -58,7 +58,7 @@ python3 train_causal_classify.py \
     --learning_rate=1e-4 \
     --batch_size=32 \
     --max_epochs=2 \
-    --run_name="lab_run" \
+    --run_name="lab_run_shuffle" \
     --data_file="challenge_training" \
     --num_workers=12 \
     --num_layers_encoder=4 \

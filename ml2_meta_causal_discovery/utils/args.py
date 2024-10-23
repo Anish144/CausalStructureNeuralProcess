@@ -164,5 +164,12 @@ def retun_default_args(parser):
         type=int,
         help="Useful if you want to train on a subset of the samples ina dataset",
     )
+    parser.add_argument(
+        "--learning_rate_decay",
+        "-lrd",
+        default=0.9,
+        type=float,
+        help="Decay learning rate",
+    )
     args = parser.parse_args()
     return args

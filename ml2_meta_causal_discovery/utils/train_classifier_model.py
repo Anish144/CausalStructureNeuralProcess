@@ -65,6 +65,7 @@ class CausalClassifierTrainer:
         lr_warmup_ratio: float,
         bfloat16: bool,
         save_dir: Path,
+        scheduler: th.optim.lr_scheduler = None,
         use_wandb: bool = True,
     ):
         self.train_dataset = train_dataset
@@ -78,6 +79,7 @@ class CausalClassifierTrainer:
         self.lr_warmup_ratio = lr_warmup_ratio
         self.bfloat16 = bfloat16
         self.save_dir = save_dir
+        self.scheduler = scheduler
         self.use_wandb = use_wandb
 
         self.learning_rate = self.optimizer.param_groups[0]["lr"]
@@ -87,19 +89,19 @@ class CausalClassifierTrainer:
     def initialise_loaders(self):
         # Get loaders
         self.train_loader = th.utils.data.DataLoader(
-            self.train_dataset, batch_size=self.batch_size, shuffle=False,
+            self.train_dataset, batch_size=self.batch_size, shuffle=True,
             num_workers=self.num_workers, pin_memory=True,
             persistent_workers=True,
             collate_fn=transformer_classifier_split_withpadding(),
         )
         self.val_loader = th.utils.data.DataLoader(
-            self.validation_dataset, batch_size=4, shuffle=False,
+            self.validation_dataset, batch_size=4, shuffle=True,
             num_workers=self.num_workers, pin_memory=True,
             persistent_workers=True,
             collate_fn=transformer_classifier_split_withpadding(),
         )
         self.test_loader = th.utils.data.DataLoader(
-            self.test_dataset, batch_size=4, shuffle=False,
+            self.test_dataset, batch_size=4, shuffle=True,
             num_workers=self.num_workers, pin_memory=True,
             persistent_workers=True,
             collate_fn=transformer_classifier_val_split_withpadding(),
@@ -279,7 +281,7 @@ class CausalClassifierTrainer:
             self.model.state_dict(),
             self.save_dir / "model_{}.pt".format(epoch),
         )
-        pass
+        return metric_dict
 
     def train(self):
         # Set model to train
@@ -287,10 +289,18 @@ class CausalClassifierTrainer:
         # Find the total number of steps for warmup
         lr_warmup_steps = int(self.lr_warmup_ratio * len(self.train_loader) * self.epochs)
         for epoch in range(self.epochs):
-            self.train_single_epoch(
+            metric_dict = self.train_single_epoch(
                 train_loader=self.train_loader, val_loader=self.val_loader,
                 test_loader=self.test_loader,
                 epoch=epoch,
                 lr_warmup_steps=lr_warmup_steps,
             )
+            metric_dict = self.validate_single_epoch(self.val_loader, metric_dict)
+            metric_dict = self.test_single_epoch(self.test_loader, metric_dict)
+            # Step the scheduler after each epoch
+            if self.scheduler is not None:
+                self.scheduler.step()
+            current_lr = self.optimizer.param_groups[0]['lr']
+            if self.use_wandb:
+                wandb.log({"learning_rate": current_lr})
         pass

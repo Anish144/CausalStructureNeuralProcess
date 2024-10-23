@@ -238,3 +238,103 @@ class MultipleFileDatasetWithPadding(MultipleFileDataset):
             attention_mask = np.concatenate([attention_mask, query_mask], axis=0)
 
         yield target_data, graph, attention_mask
+
+
+class FineTuneMultipleFileDataset(th.utils.data.Dataset):
+    def __init__(
+        self, data_dict: dict, true_graph_dict: dict, sample_size: Optional[int]=None,
+    ):
+        super().__init__()
+        self.all_data = []
+        self.all_graphs = []
+        for key, data in data_dict.items():
+            self.all_data.append(data.to_numpy()[None])
+            self.all_graphs.append(true_graph_dict[key].to_numpy()[None])
+        # Assume all datasets have the same size
+        self.size_each_dataset = self.all_data[0].shape[0]
+        # Data to subsample
+        self.sample_size = sample_size
+        if self.sample_size is not None:
+            assert self.sample_size <= self.all_data[0].shape[1]
+
+    def load_data(self, data_idx, file_counter):
+        target_data = self.all_data[file_counter][data_idx]
+        graph_no = self.all_graphs[file_counter][data_idx]
+        if self.sample_size is not None:
+            indices = np.random.choice(
+                target_data.shape[0], self.sample_size, replace=False
+            )
+            target_data = target_data[indices]
+        # Normalise the dataset
+        target_data = (
+            target_data - target_data.mean(axis=0)[None, :]
+        ) / target_data.std(axis=0)[None, :]
+        yield target_data, graph_no
+
+    def __getitem__(self, idx):
+        # Make sure the same item is not returned twice in parallel
+        file_counter = idx // self.size_each_dataset
+        data_idx = idx % self.size_each_dataset
+
+        all_data = next(self.load_data(data_idx, file_counter))
+        return all_data
+
+    def __len__(self):
+        return sum([i.shape[0] for i in self.all_data])
+
+
+class FineTuneMultipleFileDatasetWithPadding(FineTuneMultipleFileDataset):
+    def __init__(
+        self, data_dict: dict, true_graph_dict: dict, max_node_num: int=10, sample_size: Optional[int]=None,
+    ):
+        super().__init__(data_dict, true_graph_dict, sample_size)
+        self.max_node_num = max_node_num
+
+    def load_data(self, data_idx, file_counter):
+        target_data = self.all_data[file_counter][data_idx]
+        graph = self.all_graphs[file_counter][data_idx]
+        if self.sample_size is not None:
+            indices = np.random.choice(
+                target_data.shape[0], self.sample_size, replace=False
+            )
+            target_data = target_data[indices]
+        # Normalise the dataset
+        target_data = (
+            target_data - target_data.mean(axis=0)[None, :]
+        ) / target_data.std(axis=0)[None, :]
+        # Pad the data
+        num_nodes = target_data.shape[-1]
+        if num_nodes < self.max_node_num:
+            new_target_data = np.pad(
+                target_data,
+                ((0, 0), (0, self.max_node_num - num_nodes)),
+                mode="constant",
+                constant_values=0,
+            )
+            # Create attention mask
+            attention_mask = np.zeros_like(target_data)
+            # Set mask value to - inf
+            zero_mask = np.zeros((target_data.shape[0], self.max_node_num - num_nodes)) - 1e30
+            attention_mask = np.concatenate([attention_mask, zero_mask], axis=-1)
+            # Mask for the query
+            query_mask = np.zeros((1, num_nodes))
+            query_mask_pad = np.zeros((1, self.max_node_num - num_nodes)) - 1e30
+            full_query_mask = np.concatenate(
+                [query_mask, query_mask_pad], axis=-1
+            )
+            attention_mask = np.concatenate([attention_mask, full_query_mask], axis=0)
+            target_data = new_target_data
+
+            # Pad the graph with 0s
+            graph = np.pad(
+                graph,
+                ((0, self.max_node_num - num_nodes), (0, self.max_node_num - num_nodes)),
+                mode="constant",
+                constant_values=0,
+            )
+        else:
+            attention_mask = np.zeros_like(target_data)
+            query_mask = np.zeros((1, num_nodes))
+            attention_mask = np.concatenate([attention_mask, query_mask], axis=0)
+
+        yield target_data, graph, attention_mask

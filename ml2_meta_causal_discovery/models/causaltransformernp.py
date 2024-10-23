@@ -469,7 +469,7 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
         """
         # Reshape the last axis
         probs = probs.contiguous().view(probs.size(0), probs.size(1), -1)
-        target_graph = target.view(target.size(0), -1)
+        target_graph = target.reshape(target.size(0), -1)
         # Calculate the loss
         existence_dist = torch.distributions.Bernoulli(
             probs=probs

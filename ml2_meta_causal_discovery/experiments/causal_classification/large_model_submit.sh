@@ -48,9 +48,9 @@ param_list=(
 #     "4,4,512,2048,16,gplvm_neuralnet_20var_ERSFL20U60,transformer,32,2,500", # RUN
 #     "4,4,256,512,8,gplvm_neuralnet_20var_ERSFL20U60,autoregressive,8,5,500", # RUN
     "4,4,512,2048,16,challenge_training,probabilistic,32,2,1000"
-    "4,4,512,4096,16,challenge_training,probabilistic,32,2,1000"
-    "4,4,1024,2048,16,challenge_training,probabilistic,32,2,1000"
-    "4,4,1024,4096,16,challenge_training,probabilistic,32,2,1000"
+    # "4,4,512,4096,16,challenge_training,probabilistic,32,2,1000"
+    # "4,4,1024,2048,16,challenge_training,probabilistic,32,2,1000"
+    # "4,4,1024,4096,16,challenge_training,probabilistic,32,2,1000"
 )
 
 # Iterate over each parameter set
