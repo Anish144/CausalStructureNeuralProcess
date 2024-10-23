@@ -55,20 +55,20 @@ export CUDA_VISIBLE_DEVICES=0
 
 
 python3 train_causal_classify.py \
-    --learning_rate=2e-4 \
+    --learning_rate=1e-4 \
     --batch_size=32 \
     --max_epochs=2 \
-    --run_name="test_padding" \
-    --data_file="gplvm_neuralnet_20var_ERSFL20U60" \
-    --num_workers=0 \
+    --run_name="lab_run" \
+    --data_file="challenge_training" \
+    --num_workers=12 \
     --num_layers_encoder=4 \
     --num_layers_decoder=4 \
-    --dim_model=128 \
-    --dim_feedforward=256 \
+    --dim_model=256 \
+    --dim_feedforward=512 \
     --decoder="probabilistic" \
     --seed=0 \
     --lr_warmup_ratio=0.1 \
-    --num_nodes=21 \
-    --nhead=8 \
-    --n_perm_samples=25 \
+    --num_nodes=10 \
+    --nhead=16 \
+    --n_perm_samples=200 \
     --sinkhorn_iter=1000 \
