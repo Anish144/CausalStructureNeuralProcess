@@ -129,7 +129,7 @@ def npf_main(args):
 
     # Load the model
     model = model_1d()
-    model_dir = work_dir / "experiments" / "causal_classification" / "models" / "lab_run"
+    model_dir = work_dir / "experiments" / "causal_classification" / "models" / "lab_run_shuffle"
     model.load_state_dict(torch.load(model_dir / "model_1.pt"))
     model = model.to("cuda")
 

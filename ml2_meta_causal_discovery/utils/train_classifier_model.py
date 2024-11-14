@@ -302,5 +302,6 @@ class CausalClassifierTrainer:
                 self.scheduler.step()
             current_lr = self.optimizer.param_groups[0]['lr']
             if self.use_wandb:
-                wandb.log({"learning_rate": current_lr})
+                metric_dict.update({"learning_rate": current_lr})
+                wandb.log(metric_dict)
         pass
