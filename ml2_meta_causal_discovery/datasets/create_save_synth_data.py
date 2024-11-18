@@ -65,18 +65,18 @@ def hpc_main(args):
 
 def hpc_classify_main(args):
     num_vars = args.num_vars
-    function_gen = "gplvm_neuralnet"
+    function_gen = "neuralnet"
     usecase = args.folder_name
     # Rest of the code...
-    num_samples = 1000
-    graph_type = ["ER", "SF"]
+    num_samples = 100
+    graph_type = ["ER"]
     exp_edges_lower = args.exp_edges_lower * num_vars
     exp_edges_upper = args.exp_edges_upper * num_vars
 
     if exp_edges_upper == exp_edges_lower:
-        name = f"{function_gen}_{num_vars}var_ER{args.exp_edges_lower}"
+        name = f"lowdata_{function_gen}_{num_vars}var_ER{args.exp_edges_lower}"
     else:
-        name = f"{function_gen}_{num_vars}var_ERSFL{args.exp_edges_lower}U{args.exp_edges_upper}"
+        name = f"lowdata_{function_gen}_{num_vars}var_ERSFL{args.exp_edges_lower}U{args.exp_edges_upper}"
 
     dataset_generator = ClassifyDatasetGenerator(
         num_variables=num_vars,
@@ -96,7 +96,7 @@ def hpc_classify_main(args):
             causal_graphs,
         ) = next(dataset_generator.generate_next_dataset())
         # Save the data as h5py
-        save_folder = Path(args.work_dir) / "datasets" / "data" / "synth_training_data" / "challenge_training" / usecase
+        save_folder = Path(args.work_dir) / "datasets" / "data" / "synth_training_data" / name / usecase
         save_folder.mkdir(exist_ok=True, parents=True)
         with h5py.File(save_folder / f'{name}_{i}.hdf5', 'w') as f:
             dset = f.create_dataset("data", data=target_data)
@@ -172,19 +172,19 @@ if __name__ == "__main__":
         "--batch_size",
         "-bs",
         type=int,
-        default=60000,
+        default=50000,
     )
     parser.add_argument(
         "--exp_edges_upper",
         "-eeu",
         type=int,
-        default=3,
+        default=2,
     )
     parser.add_argument(
         "--exp_edges_lower",
         "-eel",
         type=int,
-        default=1,
+        default=2,
     )
     parser.add_argument(
         "--folder_name",
