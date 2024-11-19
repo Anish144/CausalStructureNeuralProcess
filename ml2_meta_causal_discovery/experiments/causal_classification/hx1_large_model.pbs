@@ -33,6 +33,7 @@ python3 /gpfs/home/ad6013/Research/CausalStructureNeuralProcess/ml2_meta_causal_
     --n_perm_samples=200 \
     --sinkhorn_iter=1000 \
     --sample_size=$SS \
+    --num_nodes=20
 
 python3 /gpfs/home/ad6013/Research/CausalStructureNeuralProcess/ml2_meta_causal_discovery/experiments/causal_classification/test_causal_classify.py \
     --model-list=$RUN_NAME \
