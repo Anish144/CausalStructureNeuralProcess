@@ -119,7 +119,7 @@ class AviciDecoder(CausalTNPEncoder):
             self.update_regulariser_weight(self.cyclicity_value_avg)
         return loss + acyclic_loss
 
-    def forward(self, target_data, graph, is_training=True):
+    def forward(self, target_data, graph, is_training=True, mask=None):
         # target_data: [batch_size, num_samples, num_nodes]
         if target_data.dim() == 3:
             target_data = target_data.unsqueeze(-1)
@@ -135,7 +135,7 @@ class AviciDecoder(CausalTNPEncoder):
         # adj_matrix is shape [batch_size, num_nodes, num_nodes]
         return adj_matrix
 
-    def sample(self, target_data: torch.Tensor, num_samples: int):
+    def sample(self, target_data: torch.Tensor, num_samples: int, mask=None):
         """
         Sample. num_samples here is samples of the graph.
 
@@ -281,7 +281,7 @@ class CsivaDecoder(CausalTNPEncoder):
         loss = loss.mean(dim=1)
         return loss
 
-    def forward(self, target_data, graph, is_training=True):
+    def forward(self, target_data, graph, is_training=True, mask=None):
         """
         Args:
         -----
@@ -324,7 +324,7 @@ class CsivaDecoder(CausalTNPEncoder):
             predict_graph = predict_graph.view(predict_graph.size(0), num_nodes, num_nodes)
             return logit, predict_graph
 
-    def sample(self, target_data: torch.Tensor, num_samples: int):
+    def sample(self, target_data: torch.Tensor, num_samples: int, mask=None):
         """
         Sample. num_samples here is samples of the graph.
 
