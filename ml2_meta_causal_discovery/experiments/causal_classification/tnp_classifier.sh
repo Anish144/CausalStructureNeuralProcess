@@ -59,12 +59,12 @@ python3 train_causal_classify.py \
     --batch_size=32 \
     --max_epochs=2 \
     --run_name="localtest" \
-    --data_file="lowdata_neuralnet_20var_ER40" \
+    --data_file="neuralnet_20var_ER40" \
     --num_workers=12 \
     --num_layers_encoder=4 \
     --num_layers_decoder=4 \
-    --dim_model=512 \
-    --dim_feedforward=1024 \
+    --dim_model=256 \
+    --dim_feedforward=512 \
     --decoder="probabilistic" \
     --seed=0 \
     --lr_warmup_ratio=0.1 \

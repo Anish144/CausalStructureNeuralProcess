@@ -241,9 +241,8 @@ class CausalClassifierTrainer:
             targets = targets.to("cuda", dtype=dtype)
             inputs = inputs.to("cuda",  dtype=dtype)
             attention_mask = attention_mask.to("cuda", dtype=dtype)
-
             # Normaliser the inputs across axis 1
-            # inputs = (inputs - inputs.mean(dim=1, keepdim=True)) / inputs.std(dim=1, keepdim=True)
+            inputs = (inputs - inputs.mean(dim=1, keepdim=True)) / inputs.std(dim=1, keepdim=True)
 
             # Zero the parameter gradients
             self.optimizer.zero_grad()

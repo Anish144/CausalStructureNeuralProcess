@@ -125,12 +125,12 @@ class AviciDecoder(CausalTNPEncoder):
             target_data = target_data.unsqueeze(-1)
         # Extract representation
         # shape [batch_size, num_nodes, 1, d_model]
-        representation = self.encode(target_data=target_data)
+        representation = self.encode(target_data=target_data, mask=mask)
         # Decode the representation
         representation = representation.squeeze(2)
         out = self.decode(representation=representation)
         # Final predictor for adjacency matrix
-        adj_matrix = self.predictor(out)
+        adj_matrix = self.predictor(out, padding_mask=mask[:, 0, :])
         # graph is shape [batch_size, num_nodes, num_nodes]
         # adj_matrix is shape [batch_size, num_nodes, num_nodes]
         return adj_matrix
@@ -303,7 +303,7 @@ class CsivaDecoder(CausalTNPEncoder):
             target_data = target_data.unsqueeze(-1)
         # Extract representation
         # shape [batch_size, num_nodes, 1, d_model]
-        representation = self.encode(target_data=target_data)
+        representation = self.encode(target_data=target_data, mask=mask)
         # Decode the representation
         # shape [batch_size, num_nodes, d_model]
         representation = representation.squeeze(2)
@@ -337,7 +337,7 @@ class CsivaDecoder(CausalTNPEncoder):
             device=target_data.device,
         )
         for i in range(num_samples):
-            _, sample = self.forward(target_data, graph=None, is_training=False)
+            _, sample = self.forward(target_data, graph=None, is_training=False, mask=mask)
             all_samples[i] = sample
         return all_samples
 
