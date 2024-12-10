@@ -10,7 +10,7 @@ import numpy as np
 import torch
 
 from ml2_meta_causal_discovery.utils.args import retun_default_args
-from ml2_meta_causal_discovery.utils.datautils import MultipleFileDatasetWithPadding
+from ml2_meta_causal_discovery.utils.datautils import MultipleFileDatasetWithPadding, MultipleFileDataset
 from ml2_meta_causal_discovery.utils.train_classifier_model import (
     CausalClassifierTrainer,
 )
@@ -39,13 +39,13 @@ def npf_main(args):
     train_dir = data_dir / "train"
     train_files = list(train_dir.iterdir())
     dataset = MultipleFileDatasetWithPadding(
-        [i for i in train_files if i.suffix == ".hdf5"], sample_size=args.sample_size, max_node_num=args.num_nodes,
+        [i for i in train_files if i.suffix == ".hdf5"], sample_size=args.sample_size,
     )
     val_dir = data_dir / "val"
     val_files = list(val_dir.iterdir())
     # Only use like 1000 samples for validation
     val_dataset = MultipleFileDatasetWithPadding(
-        [i for i in val_files if i.suffix == ".hdf5"], sample_size=args.sample_size, max_node_num=args.num_nodes,
+        [i for i in val_files if i.suffix == ".hdf5"], sample_size=args.sample_size,
     )
 
     TNPD_KWARGS = dict(

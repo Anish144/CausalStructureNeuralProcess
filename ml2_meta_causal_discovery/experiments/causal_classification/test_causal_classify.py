@@ -116,7 +116,7 @@ def main(
         x = x.to("cuda")
         targets = y.to("cuda")
         with th.no_grad():
-            pred_samples = model.sample(x, num_samples=num_samples)
+            pred_samples, _ = model.sample(x, num_samples=num_samples)
             auc = auc_graph_scores(targets, pred_samples)
             log_prob = log_prob_graph_scores(targets, pred_samples.to(targets.device))
             e_shd = expected_shd(targets.cpu().detach().numpy(), pred_samples.cpu().detach().numpy())

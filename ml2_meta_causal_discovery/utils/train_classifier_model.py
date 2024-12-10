@@ -104,7 +104,7 @@ class CausalClassifierTrainer:
             self.test_dataset, batch_size=4, shuffle=True,
             num_workers=self.num_workers, pin_memory=True,
             persistent_workers=True,
-            collate_fn=transformer_classifier_val_split_withpadding(),
+            collate_fn=transformer_classifier_split_withpadding(),
         )
 
     def apply_learning_rate_warmup(self, epoch, step, lr_warmup_steps, is_avici=False):
@@ -136,8 +136,9 @@ class CausalClassifierTrainer:
                 inputs, targets, attention_mask = data
                 targets = targets.to("cuda", dtype=dtype)
                 inputs = inputs.to("cuda", dtype=dtype)
-                attention_mask = attention_mask.to("cuda", dtype=dtype)
-                # inputs = (inputs - inputs.mean(dim=1, keepdim=True)) / inputs.std(dim=1, keepdim=True)
+                if attention_mask is not None:
+                    attention_mask = attention_mask.to("cuda", dtype=dtype)
+                inputs = (inputs - inputs.mean(dim=1, keepdim=True)) / inputs.std(dim=1, keepdim=True)
                 # Forward pass
                 adj_logit = self.model(inputs, graph=targets, mask=attention_mask, is_training=False)
 
@@ -191,8 +192,9 @@ class CausalClassifierTrainer:
             inputs, targets, attention_mask = data
             targets = targets.to("cuda", dtype=dtype)
             inputs = inputs.to("cuda", dtype=dtype)
-            attention_mask = attention_mask.to("cuda", dtype=dtype)
-            # inputs = (inputs - inputs.mean(dim=1, keepdim=True)) / inputs.std(dim=1, keepdim=True)
+            if attention_mask is not None:
+                attention_mask = attention_mask.to("cuda", dtype=dtype)
+            inputs = (inputs - inputs.mean(dim=1, keepdim=True)) / inputs.std(dim=1, keepdim=True)
             # Forward pass
             adj_logit = self.model(inputs, graph=targets, is_training=False, mask=attention_mask)
 
@@ -239,8 +241,9 @@ class CausalClassifierTrainer:
             # Get the inputs and targets
             inputs, targets, attention_mask = data
             targets = targets.to("cuda", dtype=dtype)
-            inputs = inputs.to("cuda",  dtype=dtype)
-            attention_mask = attention_mask.to("cuda", dtype=dtype)
+            inputs = inputs.to("cuda", dtype=dtype)
+            if attention_mask is not None:
+                attention_mask = attention_mask.to("cuda", dtype=dtype)
             # Normaliser the inputs across axis 1
             inputs = (inputs - inputs.mean(dim=1, keepdim=True)) / inputs.std(dim=1, keepdim=True)
 

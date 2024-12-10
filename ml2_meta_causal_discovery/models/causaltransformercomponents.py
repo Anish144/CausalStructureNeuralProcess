@@ -99,11 +99,13 @@ class CausalTransformerEncoder(nn.Module):
                 src = src.contiguous().view(batch_size * num_samples, num_nodes, d_model)
                 # Extra zeros for the query
                 node_src_key_padding_mask = src_key_padding_mask
-                node_src_key_padding_mask = node_src_key_padding_mask.contiguous().view(batch_size * num_samples, num_nodes)
+                if node_src_key_padding_mask is not None:
+                    node_src_key_padding_mask = node_src_key_padding_mask.contiguous().view(batch_size * num_samples, num_nodes)
                 src = mod(src, src_mask=src_mask, src_key_padding_mask=node_src_key_padding_mask, is_causal=is_causal)
                 # Make masking position back to zero
-                bool_pad = node_src_key_padding_mask == -float("inf")
-                src = src.masked_fill_(bool_pad.unsqueeze(-1), 0)
+                if node_src_key_padding_mask is not None:
+                    bool_pad = node_src_key_padding_mask == -float("inf")
+                    src = src.masked_fill_(bool_pad.unsqueeze(-1), 0)
                 # Reshape the tensor back to [batch_size, num_samples, num_nodes, d_model]
                 src = src.contiguous().view(batch_size, num_samples, num_nodes, d_model)
         return src
@@ -206,7 +208,7 @@ class CausalAdjacencyMatrix(nn.Module):
             self.in_proj_bias.data.zero_()
             self.out_proj_bias.data.zero_()
 
-        def forward(self, representation, padding_mask=None):
+        def forward(self, representation, padding_mask: Optional[Tensor] = None):
             """
             Performs attention over the representation to compute the adjacency matrix.
 
@@ -267,8 +269,9 @@ class CausalAdjacencyMatrix(nn.Module):
             pred = attn_weight @ self.out_proj_weight + self.out_proj_bias
             pred = pred.squeeze(-1)
             pred = pred
-            new_mask = padding_mask.unsqueeze(1) + padding_mask.unsqueeze(2)
-            pred = pred + new_mask
+            if padding_mask is not None:
+                new_mask = padding_mask.unsqueeze(1) + padding_mask.unsqueeze(2)
+                pred = pred + new_mask
             return pred
 
 
@@ -437,7 +440,7 @@ class CausalTNPEncoder(nn.Module):
             summary_rep = summary_rep.contiguous().view(batch, num_nodes, 1, d_model)
             return summary_rep
 
-    def encode(self, target_data, mask=None):
+    def encode(self, target_data, mask: Optional[Tensor]=None):
         # First step is to embed the nodes and samples
         # shape [batch_size, num_samples + 1, num_nodes, d_model]
         embedding = self.embed(target_data)

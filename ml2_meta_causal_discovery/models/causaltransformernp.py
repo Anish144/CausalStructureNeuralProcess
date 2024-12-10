@@ -130,7 +130,9 @@ class AviciDecoder(CausalTNPEncoder):
         representation = representation.squeeze(2)
         out = self.decode(representation=representation)
         # Final predictor for adjacency matrix
-        adj_matrix = self.predictor(out, padding_mask=mask[:, 0, :])
+        if mask is not None:
+            mask = mask[:, 0, :]
+        adj_matrix = self.predictor(out, padding_mask=mask)
         # graph is shape [batch_size, num_nodes, num_nodes]
         # adj_matrix is shape [batch_size, num_nodes, num_nodes]
         return adj_matrix
@@ -510,7 +512,10 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
         representation = representation.squeeze(2)
         # L: shape [batch_size, num_nodes, num_nodes]
         # Q: shape [batch_size, num_nodes, d_model]
-        decoder_mask = mask[:, 0, :]
+        if mask is not None:
+            decoder_mask = mask[:, 0, :]
+        else:
+            decoder_mask = None
         L_param, Q_rep = self.decode(representation=representation, mask=decoder_mask)
         # shape [batch_size, num_nodes]
         # we want padded part to have inf
@@ -528,10 +533,11 @@ class CausalProbabilisticDecoder(CausalTNPEncoder):
         # Sample permutations
         # shape = [batch_size, n_samples, num_nodes, num_nodes]
         Q_param = torch.functional.F.logsigmoid(Q_param)
-        Q_mask = decoder_mask.unsqueeze(1) + decoder_mask.unsqueeze(2)
-        # Set diagonal to 0
-        Q_mask = Q_mask * (1 - torch.eye(Q_mask.size(-1), device=Q_mask.device))
-        Q_param = Q_param + Q_mask
+        if decoder_mask is not None:
+            Q_mask = decoder_mask.unsqueeze(1) + decoder_mask.unsqueeze(2)
+            # Set diagonal to 0
+            Q_mask = Q_mask * (1 - torch.eye(Q_mask.size(-1), device=Q_mask.device))
+            Q_param = Q_param + Q_mask
         perm, _ = sample_permutation(
             log_alpha=Q_param,
             temp=1.0,

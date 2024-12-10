@@ -75,10 +75,13 @@ def transformer_classifier_split_withpadding():
     def mycollate(batch):
         full_data = np.stack([i[0] for i in batch], axis=0)
         full_target = np.stack([i[1] for i in batch], axis=0)
-        full_mask = np.stack([i[2] for i in batch], axis=0)
         inputs = th.from_numpy(full_data).float()
         targets = th.from_numpy(full_target).float()
-        mask = th.from_numpy(full_mask).float()
+        if batch[0][2] is not None:
+            full_mask = np.stack([i[2] for i in batch], axis=0)
+            mask = th.from_numpy(full_mask).float()
+        else:
+            mask = None
         return inputs, targets, mask
 
     return mycollate
@@ -236,6 +239,7 @@ class MultipleFileDatasetWithPadding(MultipleFileDataset):
             attention_mask = np.zeros_like(target_data)
             query_mask = np.zeros((1, num_nodes))
             attention_mask = np.concatenate([attention_mask, query_mask], axis=0)
+            # attention_mask = None
 
         yield target_data, graph, attention_mask
 
