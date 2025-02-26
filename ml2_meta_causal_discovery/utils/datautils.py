@@ -236,10 +236,10 @@ class MultipleFileDatasetWithPadding(MultipleFileDataset):
                 constant_values=0,
             )
         else:
-            attention_mask = np.zeros_like(target_data)
-            query_mask = np.zeros((1, num_nodes))
-            attention_mask = np.concatenate([attention_mask, query_mask], axis=0)
-            # attention_mask = None
+            # attention_mask = np.zeros_like(target_data)
+            # query_mask = np.zeros((1, num_nodes))
+            # attention_mask = np.concatenate([attention_mask, query_mask], axis=0)
+            attention_mask = None
 
         yield target_data, graph, attention_mask
 
