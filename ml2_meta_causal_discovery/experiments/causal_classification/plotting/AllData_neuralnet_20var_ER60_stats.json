@@ -1,0 +1,30 @@
+{
+    "Expected SHD": {
+        "BCNP All Data": {
+            "mean": 68.3420799255371,
+            "variance": 20.658536578524934,
+            "variance_of_mean": 0.8263414631409973
+        }
+    },
+    "Expected Edge F1": {
+        "BCNP All Data": {
+            "mean": 0.39062173843429276,
+            "variance": 0.0012022040391695195,
+            "variance_of_mean": 4.808816156678078e-05
+        }
+    },
+    "AUC": {
+        "BCNP All Data": {
+            "mean": 0.8282607843137255,
+            "variance": 0.0007893516756375734,
+            "variance_of_mean": 3.157406702550294e-05
+        }
+    },
+    "Negative Log Probability": {
+        "BCNP All Data": {
+            "mean": -127.4844595336914,
+            "variance": 183.24254141150777,
+            "variance_of_mean": 7.329701656460311
+        }
+    }
+}

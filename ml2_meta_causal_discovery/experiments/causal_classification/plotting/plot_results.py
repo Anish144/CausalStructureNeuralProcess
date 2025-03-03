@@ -1,13 +1,13 @@
 """
 Plot the results of the causal classification experiments.
 """
-from pathlib import Path
-import numpy as np
 import json
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt
-
 
 
 def load_baseline_results(work_dir: Path, baseline_file: list, data_name: str):
@@ -109,7 +109,7 @@ def plot_results(results: dict, model_key: dict, data_name: str):
         ax.grid(True, which='major', axis='y', linestyle='--', linewidth=0.7, color='gray', alpha=0.7)
 
         # Save each plot as a high-resolution image
-        output_path = Path(__file__).absolute().parent / f'Baseline_{data_name}_{var}_Boxplot.png'
+        output_path = Path(__file__).absolute().parent / f'AllData_{data_name}_{var}_Boxplot.png'
         plt.savefig(output_path, format='png', dpi=300, bbox_inches='tight')
 
         # Show the plot
@@ -130,7 +130,7 @@ def plot_results(results: dict, model_key: dict, data_name: str):
         }
 
     # Save the stats data to a JSON file
-    json_output_path = Path(__file__).absolute().parent / f'Baseline_{data_name}_stats.json'
+    json_output_path = Path(__file__).absolute().parent / f'AllData_{data_name}_stats.json'
     with open(json_output_path, 'w') as json_file:
         json.dump(stats_data, json_file, indent=4)
 
@@ -185,17 +185,17 @@ if __name__ == "__main__":
     work_dir = Path(__file__).absolute().parent.parent.parent.parent
 
     data_name_list = [
-        # "gplvm_20var_ER20",
-        # "gplvm_20var_ER40",
-        # "gplvm_20var_ER60",
-        # "linear_20var_ER20",
-        # "linear_20var_ER40",
-        # "linear_20var_ER60",
-        # "neuralnet_20var_ER20",
-        # "neuralnet_20var_ER40",
-        # "neuralnet_20var_ER60",
+        "gplvm_20var_ER20",
+        "gplvm_20var_ER40",
+        "gplvm_20var_ER60",
+        "linear_20var_ER20",
+        "linear_20var_ER40",
+        "linear_20var_ER60",
+        "neuralnet_20var_ER20",
+        "neuralnet_20var_ER40",
+        "neuralnet_20var_ER60",
         # "neuralnet_20var_ERL20U60",
-        "syntren"
+        # "syntren"
     ]
 
     # Need this to load the results
@@ -219,28 +219,30 @@ if __name__ == "__main__":
     # model_8 = "probabilistic_neuralnet_20var_ERL20U60_NH8_NE4_ND4_DM512_DF1024"
 
     baseline_files = [
-        baseline_model_1,
-        baseline_model_2,
+        # baseline_model_1,
+        # baseline_model_2,
     ]
 
     for data in data_name_list:
         # model_1 = f"transformer_{data}_NH8_NE4_ND4_DM256_DF512_BS32"
         # model_2 = f"autoregressive_{data}_NH8_NE4_ND4_DM256_DF512_BS8"
         # model_3 = f"probabilistic_{data}_NH8_NE4_ND4_DM256_DF512_BS32"
-        model_4 = f"autoregressive_gplvm_neuralnet_20var_ERSFL20U60_NH16_NE4_ND4_DM256_DF1024_BS4_SS500"
-        model_5 = "transformer_gplvm_neuralnet_20var_ERSFL20U60_NH16_NE4_ND4_DM512_DF2048_BS32_SS500"
-        model_6 = "probabilistic_gplvm_neuralnet_20var_ERSFL20U60_NH16_NE4_ND4_DM512_DF2048_BS32_SS500"
+        # model_4 = f"autoregressive_gplvm_neuralnet_20var_ERSFL20U60_NH16_NE4_ND4_DM256_DF1024_BS4_SS500"
+        # model_5 = "transformer_gplvm_neuralnet_20var_ERSFL20U60_NH16_NE4_ND4_DM512_DF2048_BS32_SS500"
+        # model_6 = "probabilistic_gplvm_neuralnet_20var_ERSFL20U60_NH16_NE4_ND4_DM512_DF2048_BS32_SS500"
+        model_6 = "AVERAGING_probabilistic_all_data_NH16_NE4_ND4_DM512_DF4096_BS32_SS1000"
+
 
         model_key = {
-            baseline_model_1: "DiBS",
-            baseline_model_2: "BayesDAG",
+            # baseline_model_1: "DiBS",
+            # baseline_model_2: "BayesDAG",
             # model_1: "AVICI",
             # model_2: "CSIvA",
             # model_3: "BCNP",
             # model_4: "BCNP (ER20-60)",
-            model_4: "CSIvA",
-            model_5: "AVICI",
-            model_6: "BCNP",
+            # model_4: "CSIvA",
+            # model_5: "AVICI",
+            model_6: "BCNP All Data",
             # model_3: "avici_ER60",
             # model_4: "avici_ERL20U60",
             # model_5: "prob_ER20",
@@ -252,8 +254,8 @@ if __name__ == "__main__":
             # model_1,
             # model_2,
             # model_3,
-            model_4,
-            model_5,
+            # model_4,
+            # model_5,
             model_6,
             # model_7,
             # model_8,

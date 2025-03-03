@@ -1,7 +1,7 @@
 python3 test_causal_classify.py \
     --work_dir="/vol/bitbucket/ad6013/Research/CausalStructureNeuralProcess/ml2_meta_causal_discovery" \
     --decoder="probabilistic" \
-    --model_list="nomask-prob-gplvm" \
+    --model_list="AVERAGING_probabilistic_all_data_NH16_NE4_ND4_DM512_DF4096_BS32_SS1000" \
     --num_nodes=20 \
 
 
