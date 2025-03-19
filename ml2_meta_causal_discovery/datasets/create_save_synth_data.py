@@ -2,65 +2,15 @@
 File to create and save synthetic data.
 """
 import argparse
+import json
+from pathlib import Path
 
-import dill
+import h5py
 import numpy as np
-from tqdm import tqdm, trange
+from tqdm import tqdm
 
 from ml2_meta_causal_discovery.datasets.dataset_generators import \
     ClassifyDatasetGenerator
-from ml2_meta_causal_discovery.utils.datautils import \
-    turn_bivariate_causal_graph_to_label
-
-import h5py
-from pathlib import Path
-import json
-
-
-def hpc_main(args):
-    name = "gplvm_fixed_hyperparam_int_collectivesampling"
-    name = "gplvm_fixed_hyperparam_int_collectivesampling"
-    # array_index = int(os.environ["PBS_ARRAY_INDEX"])
-    dataset_generator = DatasetGenerator(
-        num_variables=2,
-        expected_node_degree=0.5,
-        function_generator='gplvm_fixed_hyperparam',
-        batch_size=5000,
-        num_samples=1000,
-        only_xcause_yeffect=False,
-        lengthscale_fixed=True,
-        lengthscale_gamma_vals=[1.5, 1],
-        epoch_steps_train=1,
-        kernel_sum=True,
-        mean_function="zero",
-        interventions=True,
-        min_context_size=200,
-        max_context_size=900,
-        sample_hyperparams_collectively=True,
-        sample_hyperparam_index=None,
-    )
-    # Context data here will have both context and target
-    for i in trange(args.data_start, args.data_end):
-        # if array_index == i // 10 + 1:
-        (
-            cntxt_data,
-            target_data,
-            intervention_data,
-            causal_graphs,
-            unique_target_indices,
-        ) = next(dataset_generator.generate_next_dataset())
-        graph_labels = turn_bivariate_causal_graph_to_label(causal_graphs)
-        # Save the data
-        with open(
-            f"/vol/bitbucket/ad6013/Research/ml2_meta_causal_discovery/ml2_meta_causal_discovery/datasets/data/synth_training_data/{name}_{i}.pickle",                "wb",
-        ) as f:
-            full_data = {
-                "context_data": cntxt_data,
-                "target_data": target_data,
-                "intervention_data": intervention_data,
-                "graph": graph_labels
-            }
-            dill.dump(full_data, f)
 
 
 def hpc_classify_main(args):

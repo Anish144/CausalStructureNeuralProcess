@@ -2,25 +2,23 @@
 Train a transformer neural process on the causal classification task.
 """
 import argparse
+import json
+import random
 import sys
 from functools import partial
 from pathlib import Path
-import wandb
+
 import numpy as np
 import torch
+import wandb
 
-from ml2_meta_causal_discovery.utils.args import retun_default_args
-from ml2_meta_causal_discovery.utils.datautils import MultipleFileDatasetWithPadding, MultipleFileDataset
-from ml2_meta_causal_discovery.utils.train_classifier_model import (
-    CausalClassifierTrainer,
-)
 from ml2_meta_causal_discovery.models.causaltransformernp import (
-    AviciDecoder,
-    CsivaDecoder,
-    CausalProbabilisticDecoder,
-)
-import random
-import json
+    AviciDecoder, CausalProbabilisticDecoder, CsivaDecoder)
+from ml2_meta_causal_discovery.utils.args import retun_default_args
+from ml2_meta_causal_discovery.utils.datautils import (
+    MultipleFileDataset, MultipleFileDatasetWithPadding)
+from ml2_meta_causal_discovery.utils.train_classifier_model import \
+    CausalClassifierTrainer
 
 
 def npf_main(args):
@@ -139,7 +137,7 @@ def npf_main(args):
 
 if __name__ == "__main__":
     # Log into weights and biases
-    wandb.login(key="bc359b26d166ea6980eb0e231060bd7b8c06925e")
+    wandb.login()
 
     parser = argparse.ArgumentParser()
     args = retun_default_args(parser)
