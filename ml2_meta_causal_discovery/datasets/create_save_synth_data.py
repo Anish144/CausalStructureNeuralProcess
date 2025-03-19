@@ -15,18 +15,18 @@ from ml2_meta_causal_discovery.datasets.dataset_generators import \
 
 def hpc_classify_main(args):
     num_vars = args.num_vars
-    function_gen = "neuralnet"
+    function_gen = "gp"
     usecase = args.folder_name
     # Rest of the code...
-    num_samples = 100
+    num_samples = 1000
     graph_type = ["ER"]
     exp_edges_lower = args.exp_edges_lower * num_vars
     exp_edges_upper = args.exp_edges_upper * num_vars
 
     if exp_edges_upper == exp_edges_lower:
-        name = f"lowdata_{function_gen}_{num_vars}var_ER{args.exp_edges_lower}"
+        name = f"{function_gen}_{num_vars}var_ER{args.exp_edges_lower}"
     else:
-        name = f"lowdata_{function_gen}_{num_vars}var_ERSFL{args.exp_edges_lower}U{args.exp_edges_upper}"
+        name = f"{function_gen}_{num_vars}var_ERL{args.exp_edges_lower}U{args.exp_edges_upper}"
 
     dataset_generator = ClassifyDatasetGenerator(
         num_variables=num_vars,
@@ -104,7 +104,7 @@ if __name__ == "__main__":
         "--num_vars",
         "-nv",
         type=int,
-        default=3,
+        default=2,
     )
     parser.add_argument(
         "--data_start",
@@ -116,7 +116,7 @@ if __name__ == "__main__":
         "--data_end",
         "-de",
         type=int,
-        default=1,
+        default=10,
     )
     parser.add_argument(
         "--batch_size",
@@ -128,13 +128,13 @@ if __name__ == "__main__":
         "--exp_edges_upper",
         "-eeu",
         type=int,
-        default=2,
+        default=1,
     )
     parser.add_argument(
         "--exp_edges_lower",
         "-eel",
         type=int,
-        default=2,
+        default=0,
     )
     parser.add_argument(
         "--folder_name",
