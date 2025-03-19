@@ -3,22 +3,19 @@ File to train the transformer NP classifier model.
 
 This will not use skorch.
 """
+from functools import partial
+from pathlib import Path
+
 import torch as th
-from ml2_meta_causal_discovery.utils.datautils import (
-    transformer_classifier_split,
-    transformer_classifier_val_split_withpadding,
-    transformer_classifier_split_withpadding,
-)
 import wandb
 from tqdm import tqdm
-from pathlib import Path
-from ml2_meta_causal_discovery.utils.wandb import plot_perm_matrix
-from ml2_meta_causal_discovery.utils.metrics import (
-    expected_shd,
-    expected_f1_score,
-    log_prob_graph_scores,
-    auc_graph_scores,
-)
+
+from ml2_meta_causal_discovery.utils.datautils import \
+    transformer_classifier_split_withpadding
+from ml2_meta_causal_discovery.utils.metrics import (auc_graph_scores,
+                                                     expected_f1_score,
+                                                     expected_shd,
+                                                     log_prob_graph_scores)
 
 
 class CausalClassifierTrainer:
@@ -65,6 +62,8 @@ class CausalClassifierTrainer:
         lr_warmup_ratio: float,
         bfloat16: bool,
         save_dir: Path,
+        sample_size_min: int,
+        sample_size_max: int,
         scheduler: th.optim.lr_scheduler = None,
         use_wandb: bool = True,
     ):
@@ -79,6 +78,8 @@ class CausalClassifierTrainer:
         self.lr_warmup_ratio = lr_warmup_ratio
         self.bfloat16 = bfloat16
         self.save_dir = save_dir
+        self.sample_size_min = sample_size_min
+        self.sample_size_max = sample_size_max
         self.scheduler = scheduler
         self.use_wandb = use_wandb
 
@@ -87,24 +88,29 @@ class CausalClassifierTrainer:
         self.initialise_loaders()
 
     def initialise_loaders(self):
+        collator = partial(
+            transformer_classifier_split_withpadding,
+            sample_size_min=self.sample_size_min,
+            sample_size_max=self.sample_size_max,
+        )
         # Get loaders
         self.train_loader = th.utils.data.DataLoader(
             self.train_dataset, batch_size=self.batch_size, shuffle=True,
             num_workers=self.num_workers, pin_memory=True,
-            persistent_workers=True,
-            collate_fn=transformer_classifier_split_withpadding(),
+            persistent_workers=False if self.num_workers == 0 else True,
+            collate_fn=collator(),
         )
         self.val_loader = th.utils.data.DataLoader(
             self.validation_dataset, batch_size=4, shuffle=True,
             num_workers=self.num_workers, pin_memory=True,
-            persistent_workers=True,
-            collate_fn=transformer_classifier_split_withpadding(),
+            persistent_workers=False if self.num_workers == 0 else True,
+            collate_fn=collator(),
         )
         self.test_loader = th.utils.data.DataLoader(
             self.test_dataset, batch_size=4, shuffle=True,
             num_workers=self.num_workers, pin_memory=True,
-            persistent_workers=True,
-            collate_fn=transformer_classifier_split_withpadding(),
+            persistent_workers=False if self.num_workers == 0 else True,
+            collate_fn=collator(),
         )
 
     def apply_learning_rate_warmup(self, epoch, step, lr_warmup_steps, is_avici=False):

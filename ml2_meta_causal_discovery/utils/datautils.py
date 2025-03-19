@@ -6,13 +6,12 @@ import random
 from typing import Optional, Tuple
 
 import dill
+import h5py
 import numpy as np
 import torch as th
 from attrdict import AttrDict
 
 from ml2_meta_causal_discovery.utils.processing import rescale_variable
-
-import h5py
 
 
 def turn_bivariate_causal_graph_to_label(causal_graph):
@@ -71,8 +70,16 @@ def transformer_classifier_split():
     return mycollate
 
 
-def transformer_classifier_split_withpadding():
+def transformer_classifier_split_withpadding(
+    sample_size_min: int, sample_size_max: int
+):
     def mycollate(batch):
+
+        curr_sample_size = np.random.randint(sample_size_min, sample_size_max)
+        indices = np.random.choice(
+            batch[0][0].shape[0], curr_sample_size, replace=False
+        )
+
         full_data = np.stack([i[0] for i in batch], axis=0)
         full_target = np.stack([i[1] for i in batch], axis=0)
         inputs = th.from_numpy(full_data).float()
@@ -82,6 +89,9 @@ def transformer_classifier_split_withpadding():
             mask = th.from_numpy(full_mask).float()
         else:
             mask = None
+
+        inputs = inputs[:, indices]
+
         return inputs, targets, mask
 
     return mycollate
@@ -144,7 +154,7 @@ def transformer_classifier_val_split_withpadding():
 
 class MultipleFileDataset(th.utils.data.Dataset):
     def __init__(
-        self, file_list: list, sample_size: Optional[int]=None,
+        self, file_list: list
     ):
         super().__init__()
         self.all_data = []
@@ -155,19 +165,11 @@ class MultipleFileDataset(th.utils.data.Dataset):
             self.all_graphs.append(f["label"])
         # Assume all datasets have the same size
         self.size_each_dataset = self.all_data[0].shape[0]
-        # Data to subsample
-        self.sample_size = sample_size
-        if self.sample_size is not None:
-            assert self.sample_size <= self.all_data[0].shape[1]
 
     def load_data(self, data_idx, file_counter):
         target_data = self.all_data[file_counter][data_idx]
         graph = self.all_graphs[file_counter][data_idx]
-        if self.sample_size is not None:
-            indices = np.random.choice(
-                target_data.shape[0], self.sample_size, replace=False
-            )
-            target_data = target_data[indices]
+
         # Normalise the dataset
         target_data = (
             target_data - target_data.mean(axis=0)[None, :]
@@ -188,19 +190,15 @@ class MultipleFileDataset(th.utils.data.Dataset):
 
 class MultipleFileDatasetWithPadding(MultipleFileDataset):
     def __init__(
-        self, file_list: list, max_node_num: int=10, sample_size: Optional[int]=None,
+        self, file_list: list, max_node_num: int=10
     ):
-        super().__init__(file_list, sample_size)
+        super().__init__(file_list)
         self.max_node_num = max_node_num
 
     def load_data(self, data_idx, file_counter):
         target_data = self.all_data[file_counter][data_idx]
         graph = self.all_graphs[file_counter][data_idx]
-        if self.sample_size is not None:
-            indices = np.random.choice(
-                target_data.shape[0], self.sample_size, replace=False
-            )
-            target_data = target_data[indices]
+
         # Normalise the dataset
         target_data = (
             target_data - target_data.mean(axis=0)[None, :]
@@ -236,9 +234,6 @@ class MultipleFileDatasetWithPadding(MultipleFileDataset):
                 constant_values=0,
             )
         else:
-            # attention_mask = np.zeros_like(target_data)
-            # query_mask = np.zeros((1, num_nodes))
-            # attention_mask = np.concatenate([attention_mask, query_mask], axis=0)
             attention_mask = None
 
         yield target_data, graph, attention_mask

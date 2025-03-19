@@ -158,8 +158,15 @@ def retun_default_args(parser):
         help="Use positional encoding in the transformer.",
     )
     parser.add_argument(
-        "--sample_size",
-        "-ss",
+        "--sample_size_min",
+        "-ss_min",
+        default=1000,
+        type=int,
+        help="Useful if you want to train on a subset of the samples ina dataset",
+    )
+    parser.add_argument(
+        "--sample_size_max",
+        "-ss_max",
         default=1000,
         type=int,
         help="Useful if you want to train on a subset of the samples ina dataset",

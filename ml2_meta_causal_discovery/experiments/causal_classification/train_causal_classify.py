@@ -37,13 +37,13 @@ def npf_main(args):
     train_dir = data_dir / "train"
     train_files = list(train_dir.iterdir())
     dataset = MultipleFileDatasetWithPadding(
-        [i for i in train_files if i.suffix == ".hdf5"], sample_size=args.sample_size,
+        [i for i in train_files if i.suffix == ".hdf5"]
     )
     val_dir = data_dir / "val"
     val_files = list(val_dir.iterdir())
     # Only use like 1000 samples for validation
     val_dataset = MultipleFileDatasetWithPadding(
-        [i for i in val_files if i.suffix == ".hdf5"], sample_size=args.sample_size,
+        [i for i in val_files if i.suffix == ".hdf5"]
     )
 
     TNPD_KWARGS = dict(
@@ -118,6 +118,8 @@ def npf_main(args):
         lr_warmup_ratio=args.lr_warmup_ratio, # Should be around 10% of the total steps
         bfloat16=True,
         save_dir=save_dir,
+        sample_size_min=args.sample_size_min,
+        sample_size_max=args.sample_size_max,
     )
     trainer.train()
     metric_dict = trainer.test_single_epoch(

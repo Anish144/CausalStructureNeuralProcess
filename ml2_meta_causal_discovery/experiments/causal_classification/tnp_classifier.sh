@@ -58,7 +58,7 @@ python3 train_causal_classify.py \
     --learning_rate=1e-4 \
     --batch_size=16 \
     --max_epochs=2 \
-    --run_name="masked-prob-gplvm" \
+    --run_name="test" \
     --data_file="gplvm_20var_ER20" \
     --num_workers=12 \
     --num_layers_encoder=4 \
@@ -72,4 +72,5 @@ python3 train_causal_classify.py \
     --nhead=8 \
     --n_perm_samples=200 \
     --sinkhorn_iter=1000 \
-    --sample_size=1000 \
+    --sample_size_min=1 \
+    --sample_size_max=1000 \
