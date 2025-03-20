@@ -59,7 +59,7 @@ python3 train_causal_classify.py \
     --batch_size=16 \
     --max_epochs=2 \
     --run_name="test" \
-    --data_file="gplvm_20var_ER20" \
+    --data_file="gp_2var_ERL0U1" \
     --num_workers=12 \
     --num_layers_encoder=4 \
     --num_layers_decoder=4 \
@@ -68,7 +68,7 @@ python3 train_causal_classify.py \
     --decoder="probabilistic" \
     --seed=0 \
     --lr_warmup_ratio=0.1 \
-    --num_nodes=20 \
+    --num_nodes=2 \
     --nhead=8 \
     --n_perm_samples=200 \
     --sinkhorn_iter=1000 \

@@ -1,20 +1,20 @@
+import copy
+import math
+from typing import Callable, Optional
+
 import torch
 import torch.nn as nn
-from typing import Callable, Optional
 from torch import Tensor
 from torch.nn import functional as F
-from torch.nn.parameter import Parameter
-import math
 from torch.nn.init import xavier_uniform_
-from ml2_meta_causal_discovery.utils.permutations import sample_permutation, sinkhorn
-import copy
+from torch.nn.parameter import Parameter
+
 from ml2_meta_causal_discovery.models.causaltransformercomponents import (
-    CausalTNPEncoder,
-    CausalAdjacencyMatrix,
-    CausalTransformerDecoderLayer,
-    build_mlp,
-)
+    CausalAdjacencyMatrix, CausalTNPEncoder, CausalTransformerDecoderLayer,
+    build_mlp)
 from ml2_meta_causal_discovery.utils.metrics import cyclicity
+from ml2_meta_causal_discovery.utils.permutations import (sample_permutation,
+                                                          sinkhorn)
 
 
 class AviciDecoder(CausalTNPEncoder):
