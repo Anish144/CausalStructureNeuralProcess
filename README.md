@@ -20,7 +20,7 @@ The model implicitly learns a prior that depends on the data generating process 
 To install requirements:
 
 ```setup
-pip install -e .https://arxiv.org/abs/2412.16577
+pip install -e .
 pip install -r requirements.txt
 ```
 
