@@ -2,7 +2,7 @@
 
 # List of parameters as space-separated strings
 param_list=(
-    "4,4,1024,4096,16,all_data,probabilistic,32,2,1,1000"
+    "4,4,1024,4096,16,gp_2var_ERL0U1,probabilistic,32,2,1,1000"
 )
 
 # Iterate over each parameter set
