@@ -1,8 +1,8 @@
 """
 File that contains the class that generates causal graphs.
 """
-import numpy as np
 import igraph as ig
+import numpy as np
 
 
 def generate_synthetic_dag(d, s0, graph_type):
@@ -106,5 +106,5 @@ if __name__ == "__main__":
     # print(np.mean(np.sum(dag, axis=1)))
     # Get 2 node DAG
     for i in range(10):
-        dag = generate_synthetic_dag(5, 5, "ER")
+        dag = generate_synthetic_dag(2, 2, "ER")
         print(dag)

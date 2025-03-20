@@ -116,7 +116,7 @@ if __name__ == "__main__":
         "--data_end",
         "-de",
         type=int,
-        default=10,
+        default=1,
     )
     parser.add_argument(
         "--batch_size",
